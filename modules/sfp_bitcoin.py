@@ -21,11 +21,11 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_bitcoin(SpiderFootPlugin):
 
     meta = {
-        'name': "Bitcoin Finder",
-        'summary': "Identify bitcoin addresses in scraped webpages.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Bitcoin Finder",
+        "summary": "Identify bitcoin addresses in scraped webpages.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
@@ -52,12 +52,12 @@ class sfp_bitcoin(SpiderFootPlugin):
         return ["BITCOIN_ADDRESS"]
 
     def to_bytes(self, n, length):
-        h = '%x' % n
-        s = codecs.decode(('0' * (len(h) % 2) + h).zfill(length * 2), "hex")
+        h = "%x" % n
+        s = codecs.decode(("0" * (len(h) % 2) + h).zfill(length * 2), "hex")
         return s
 
     def decode_base58(self, bc, length):
-        digits58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+        digits58 = "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz"
         n = 0
         for char in bc:
             n = n * 58 + digits58.index(char)
@@ -88,5 +88,6 @@ class sfp_bitcoin(SpiderFootPlugin):
             if self.check_bc(m):
                 evt = SpiderFootEvent("BITCOIN_ADDRESS", m, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_bitcoin class

@@ -19,35 +19,33 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_opendns(SpiderFootPlugin):
 
     meta = {
-        'name': "OpenDNS",
-        'summary': "Check if a host would be blocked by OpenDNS DNS",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.opendns.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
+        "name": "OpenDNS",
+        "summary": "Check if a host would be blocked by OpenDNS DNS",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.opendns.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [
                 "https://support.opendns.com/hc/en-us",
                 "https://support.opendns.com/hc/en-us/categories/204012807-OpenDNS-Knowledge-Base",
-                "https://support.opendns.com/hc/en-us/categories/204012907-OpenDNS-Device-Configuration"
+                "https://support.opendns.com/hc/en-us/categories/204012907-OpenDNS-Device-Configuration",
             ],
-            'favIcon': "https://www.google.com/s2/favicons?domain=https://www.opendns.com/",
-            'logo': "https://d15ni2z53ptwz9.cloudfront.net/opendns-www/img/logo-opendns.png",
-            'description': "Cisco Umbrella provides protection against threats on the internet such as "
+            "favIcon": "https://www.google.com/s2/favicons?domain=https://www.opendns.com/",
+            "logo": "https://d15ni2z53ptwz9.cloudfront.net/opendns-www/img/logo-opendns.png",
+            "description": "Cisco Umbrella provides protection against threats on the internet such as "
             "malware, phishing, and ransomware.\n"
             "OpenDNS is a suite of consumer products aimed at "
             "making your internet faster, safer, and more reliable.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -66,8 +64,7 @@ class sfp_opendns(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME",
-                "MALICIOUS_COHOST"]
+        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME", "MALICIOUS_COHOST"]
 
     def queryAddr(self, qaddr):
         res = dns.resolver.Resolver()
@@ -112,8 +109,8 @@ class sfp_opendns(SpiderFootPlugin):
             if eventName == "CO_HOSTED_SITE":
                 typ = "MALICIOUS_COHOST"
             if not found:
-                evt = SpiderFootEvent(typ, "Blocked by OpenDNS [" + eventData + "]",
-                                      self.__name__, parentEvent)
+                evt = SpiderFootEvent(typ, "Blocked by OpenDNS [" + eventData + "]", self.__name__, parentEvent)
                 self.notifyListeners(evt)
+
 
 # End of sfp_opendns class

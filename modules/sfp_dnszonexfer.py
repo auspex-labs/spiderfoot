@@ -21,18 +21,16 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_dnszonexfer(SpiderFootPlugin):
 
     meta = {
-        'name': "DNS Zone Transfer",
-        'summary': "Attempts to perform a full DNS zone transfer.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate"],
-        'categories': ["DNS"]
+        "name": "DNS Zone Transfer",
+        "summary": "Attempts to perform a full DNS zone transfer.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate"],
+        "categories": ["DNS"],
     }
 
-    opts = {
-    }
+    opts = {}
 
-    optdescs = {
-    }
+    optdescs = {}
 
     events = None
 
@@ -45,7 +43,7 @@ class sfp_dnszonexfer(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return ['PROVIDER_DNS']
+        return ["PROVIDER_DNS"]
 
     def producedEvents(self):
         return ["RAW_DNS_RECORDS", "INTERNET_NAME"]
@@ -70,8 +68,8 @@ class sfp_dnszonexfer(SpiderFootPlugin):
         self.events[eventDataHash] = True
 
         res = dns.resolver.Resolver()
-        if self.opts.get('_dnsserver', "") != "":
-            res.nameservers = [self.opts['_dnsserver']]
+        if self.opts.get("_dnsserver", "") != "":
+            res.nameservers = [self.opts["_dnsserver"]]
 
         # Get the name server's IP. This is to avoid DNS leaks
         # when attempting to resolve the name server during
@@ -121,5 +119,6 @@ class sfp_dnszonexfer(SpiderFootPlugin):
 
             except Exception as e:
                 self.sf.info(f"Unable to perform DNS zone transfer for {eventData} ({name}): {e}")
+
 
 # End of sfp_dnszonexfer class

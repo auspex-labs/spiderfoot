@@ -23,29 +23,25 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_keybase(SpiderFootPlugin):
 
     meta = {
-        'name': "Keybase",
-        'summary': "Obtain additional information about target username",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Public Registries"],
-        'dataSource': {
-            'website': "https://keybase.io/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://keybase.io/docs"
-            ],
-            'favIcon': "https://keybase.io/images/icons/icon-keybase-logo-48.png",
-            'logo': "https://keybase.io/images/icons/icon-keybase-logo-48.png",
-            'description': "Keybase is a key directory that maps social media identities to encryption keys "
+        "name": "Keybase",
+        "summary": "Obtain additional information about target username",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Public Registries"],
+        "dataSource": {
+            "website": "https://keybase.io/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://keybase.io/docs"],
+            "favIcon": "https://keybase.io/images/icons/icon-keybase-logo-48.png",
+            "logo": "https://keybase.io/images/icons/icon-keybase-logo-48.png",
+            "description": "Keybase is a key directory that maps social media identities to encryption keys "
             "in a publicly auditable manner.",
-        }
+        },
     }
 
-    opts = {
-    }
+    opts = {}
 
-    optdescs = {
-    }
+    optdescs = {}
 
     # Tracking results can be helpful to avoid reporting/processing duplicates
     results = None
@@ -65,40 +61,33 @@ class sfp_keybase(SpiderFootPlugin):
         return ["USERNAME", "LINKED_URL_EXTERNAL"]
 
     def producedEvents(self):
-        return [
-            "RAW_RIR_DATA", "SOCIAL_MEDIA", "USERNAME",
-            "GEOINFO", "BITCOIN_ADDRESS", "PGP_KEY"
-        ]
+        return ["RAW_RIR_DATA", "SOCIAL_MEDIA", "USERNAME", "GEOINFO", "BITCOIN_ADDRESS", "PGP_KEY"]
 
     def queryUsername(self, qry):
 
-        params = {
-            'usernames': qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
-        }
+        params = {"usernames": qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}
 
-        headers = {
-            'Accept': "application/json"
-        }
+        headers = {"Accept": "application/json"}
 
         res = self.sf.fetchUrl(
-            'https://keybase.io/_/api/1.0/user/lookup.json?' + urllib.parse.urlencode(params),
+            "https://keybase.io/_/api/1.0/user/lookup.json?" + urllib.parse.urlencode(params),
             headers=headers,
             timeout=15,
-            useragent=self.opts['_useragent']
+            useragent=self.opts["_useragent"],
         )
 
         # In this case, it will always be 200 if keybase is queried
         # The actual response codes are stored in status tag of the response
-        if not res['code'] == '200':
+        if not res["code"] == "200":
             return None
 
-        content = json.loads(res['content'])
+        content = json.loads(res["content"])
 
-        status = content.get('status')
+        status = content.get("status")
         if status is None:
             return None
 
-        code = status.get('code')
+        code = status.get("code")
         if code is None:
             return None
 
@@ -163,7 +152,7 @@ class sfp_keybase(SpiderFootPlugin):
 
         # Contains all data about the target username
         try:
-            them = content.get('them')[0]
+            them = content.get("them")[0]
         except Exception:
             self.sf.error("Invalid data received")
             them = None
@@ -173,42 +162,41 @@ class sfp_keybase(SpiderFootPlugin):
             return None
 
         # Basic information about the username
-        basics = them.get('basics')
+        basics = them.get("basics")
 
         # Profile information about the username
-        profile = them.get('profile')
+        profile = them.get("profile")
 
         # Failsafe to prevent reporting any wrongly received data
         if basics:
-            responseUserName = basics.get('username')
+            responseUserName = basics.get("username")
             if not userName == responseUserName:
                 self.sf.error("Username does not match received response, skipping")
                 return None
 
         if profile:
             # Get and report full name of user
-            fullName = profile.get('full_name')
+            fullName = profile.get("full_name")
             if fullName:
-                evt = SpiderFootEvent("RAW_RIR_DATA", f"Possible full name: {fullName}",
-                                      self.__name__, event)
+                evt = SpiderFootEvent("RAW_RIR_DATA", f"Possible full name: {fullName}", self.__name__, event)
                 self.notifyListeners(evt)
 
             # Get and report location of user
-            location = profile.get('location')
+            location = profile.get("location")
             if location:
                 evt = SpiderFootEvent("GEOINFO", location, self.__name__, event)
                 self.notifyListeners(evt)
 
         # Extract social media information
-        proofsSummary = them.get('proofs_summary')
+        proofsSummary = them.get("proofs_summary")
 
         if proofsSummary:
-            socialMediaData = proofsSummary.get('all')
+            socialMediaData = proofsSummary.get("all")
 
             if socialMediaData:
                 for socialMedia in socialMediaData:
-                    socialMediaSite = socialMedia.get('proof_type')
-                    socialMediaURL = socialMedia.get('service_url')
+                    socialMediaSite = socialMedia.get("proof_type")
+                    socialMediaURL = socialMedia.get("service_url")
 
                     if socialMediaSite and socialMediaURL:
                         socialMedia = socialMediaSite + ": " + "<SFURL>" + socialMediaURL + "</SFURL>"
@@ -217,16 +205,16 @@ class sfp_keybase(SpiderFootPlugin):
                         self.notifyListeners(evt)
 
         # Get cryptocurrency addresses
-        cryptoAddresses = them.get('cryptocurrency_addresses')
+        cryptoAddresses = them.get("cryptocurrency_addresses")
 
         # Extract and report bitcoin addresses if any
         if cryptoAddresses:
-            bitcoinAddresses = cryptoAddresses.get('bitcoin')
+            bitcoinAddresses = cryptoAddresses.get("bitcoin")
 
             if bitcoinAddresses:
 
                 for bitcoinAddress in bitcoinAddresses:
-                    btcAddress = bitcoinAddress.get('address')
+                    btcAddress = bitcoinAddress.get("address")
 
                     if btcAddress is None:
                         continue
@@ -258,5 +246,6 @@ class sfp_keybase(SpiderFootPlugin):
 
             evt = SpiderFootEvent("PGP_KEY", pgpKey, self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_keybase class

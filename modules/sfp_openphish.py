@@ -17,11 +17,11 @@ from netaddr import IPAddress, IPNetwork
 from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 
 malchecks = {
-    'OpenPhish': {
-        'id': '_openphish',
-        'checks': ['domain'],
-        'url': 'https://www.openphish.com/feed.txt',
-        'regex': r'\w+://(.*\.)?[^a-zA-Z0-9]?{0}.*'
+    "OpenPhish": {
+        "id": "_openphish",
+        "checks": ["domain"],
+        "url": "https://www.openphish.com/feed.txt",
+        "regex": r"\w+://(.*\.)?[^a-zA-Z0-9]?{0}.*",
     }
 }
 
@@ -29,39 +29,33 @@ malchecks = {
 class sfp_openphish(SpiderFootPlugin):
 
     meta = {
-        'name': "OpenPhish",
-        'summary': "Check if a host/domain is malicious according to OpenPhish.com.",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://openphish.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://openphish.com/faq.html",
-                "https://openphish.com/feed.txt"
-            ],
-            'favIcon': "",
-            'logo': "https://openphish.com/static/openphish_logo2.png",
-            'description': "Timely. Accurate. Relevant Threat Intelligence.\n"
+        "name": "OpenPhish",
+        "summary": "Check if a host/domain is malicious according to OpenPhish.com.",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://openphish.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://openphish.com/faq.html", "https://openphish.com/feed.txt"],
+            "favIcon": "",
+            "logo": "https://openphish.com/static/openphish_logo2.png",
+            "description": "Timely. Accurate. Relevant Threat Intelligence.\n"
             "OpenPhish is a fully automated self-contained platform for phishing intelligence. "
-            "It identifies phishing sites and performs intelligence analysis ""in real time "
+            "It identifies phishing sites and performs intelligence analysis "
+            "in real time "
             "without human intervention and without using any external resources, such as blacklists.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        'checkaffiliates': True,
-        'checkcohosts': True,
-        'cacheperiod': 18
-    }
+    opts = {"checkaffiliates": True, "checkcohosts": True, "cacheperiod": 18}
 
     # Option descriptions
     optdescs = {
-        'checkaffiliates': "Apply checks to affiliates?",
-        'checkcohosts': "Apply checks to sites found to be co-hosted on the target's IP?",
-        'cacheperiod': "Hours to cache list data before re-fetching."
+        "checkaffiliates": "Apply checks to affiliates?",
+        "checkcohosts": "Apply checks to sites found to be co-hosted on the target's IP?",
+        "cacheperiod": "Hours to cache list data before re-fetching.",
     }
 
     # Be sure to completely clear any class variables in setup()
@@ -88,31 +82,30 @@ class sfp_openphish(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME",
-                "MALICIOUS_COHOST"]
+        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME", "MALICIOUS_COHOST"]
 
     # Look up 'list' type resources
     def resourceList(self, id, target, targetType):
-        targetDom = ''
+        targetDom = ""
         # Get the base domain if we're supplied a domain
         if targetType == "domain":
-            targetDom = self.sf.hostDomain(target, self.opts['_internettlds'])
+            targetDom = self.sf.hostDomain(target, self.opts["_internettlds"])
             if not targetDom:
                 return None
 
         for check in list(malchecks.keys()):
-            cid = malchecks[check]['id']
+            cid = malchecks[check]["id"]
             if id == cid:
                 data = dict()
-                url = malchecks[check]['url']
-                data['content'] = self.sf.cacheGet("sfmal_" + cid, self.opts.get('cacheperiod', 0))
-                if data['content'] is None:
-                    data = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'], useragent=self.opts['_useragent'])
-                    if data['content'] is None:
+                url = malchecks[check]["url"]
+                data["content"] = self.sf.cacheGet("sfmal_" + cid, self.opts.get("cacheperiod", 0))
+                if data["content"] is None:
+                    data = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent=self.opts["_useragent"])
+                    if data["content"] is None:
                         self.sf.error("Unable to fetch " + url)
                         return None
                     else:
-                        self.sf.cachePut("sfmal_" + cid, data['content'])
+                        self.sf.cachePut("sfmal_" + cid, data["content"])
 
                 # If we're looking at netblocks
                 if targetType == "netblock":
@@ -120,17 +113,17 @@ class sfp_openphish(SpiderFootPlugin):
                     # Get the regex, replace {0} with an IP address matcher to
                     # build a list of IP.
                     # Cycle through each IP and check if it's in the netblock.
-                    if 'regex' in malchecks[check]:
-                        rx = malchecks[check]['regex'].replace("{0}", r"(\d+\.\d+\.\d+\.\d+)")
+                    if "regex" in malchecks[check]:
+                        rx = malchecks[check]["regex"].replace("{0}", r"(\d+\.\d+\.\d+\.\d+)")
                         pat = re.compile(rx, re.IGNORECASE)
                         self.sf.debug("New regex for " + check + ": " + rx)
-                        for line in data['content'].split('\n'):
+                        for line in data["content"].split("\n"):
                             grp = re.findall(pat, line)
                             if len(grp) > 0:
                                 # self.sf.debug("Adding " + grp[0] + " to list.")
                                 iplist.append(grp[0])
                     else:
-                        iplist = data['content'].split('\n')
+                        iplist = data["content"].split("\n")
 
                     for ip in iplist:
                         if len(ip) < 8 or ip.startswith("#"):
@@ -148,19 +141,20 @@ class sfp_openphish(SpiderFootPlugin):
                     return None
 
                 # If we're looking at hostnames/domains/IPs
-                if 'regex' not in malchecks[check]:
-                    for line in data['content'].split('\n'):
+                if "regex" not in malchecks[check]:
+                    for line in data["content"].split("\n"):
                         if line == target or (targetType == "domain" and line == targetDom):
                             self.sf.debug(target + "/" + targetDom + " found in " + check + " list.")
                             return url
                 else:
                     # Check for the domain and the hostname
                     try:
-                        rxDom = str(malchecks[check]['regex']).format(targetDom)
-                        rxTgt = str(malchecks[check]['regex']).format(target)
-                        for line in data['content'].split('\n'):
-                            if (targetType == "domain" and re.match(rxDom, line, re.IGNORECASE)) or \
-                                    re.match(rxTgt, line, re.IGNORECASE):
+                        rxDom = str(malchecks[check]["regex"]).format(targetDom)
+                        rxTgt = str(malchecks[check]["regex"]).format(target)
+                        for line in data["content"].split("\n"):
+                            if (targetType == "domain" and re.match(rxDom, line, re.IGNORECASE)) or re.match(
+                                rxTgt, line, re.IGNORECASE
+                            ):
                                 self.sf.debug(target + "/" + targetDom + " found in " + check + " list.")
                                 return url
                     except Exception as e:
@@ -171,8 +165,8 @@ class sfp_openphish(SpiderFootPlugin):
 
     def lookupItem(self, resourceId, itemType, target):
         for check in list(malchecks.keys()):
-            cid = malchecks[check]['id']
-            if cid == resourceId and itemType in malchecks[check]['checks']:
+            cid = malchecks[check]["id"]
+            if cid == resourceId and itemType in malchecks[check]["checks"]:
                 self.sf.debug("Checking maliciousness of " + target + " (" + itemType + ") with: " + cid)
                 return self.resourceList(cid, target, itemType)
 
@@ -192,35 +186,33 @@ class sfp_openphish(SpiderFootPlugin):
 
         self.results[eventData] = True
 
-        if eventName == 'CO_HOSTED_SITE' and not self.opts.get('checkcohosts', False):
+        if eventName == "CO_HOSTED_SITE" and not self.opts.get("checkcohosts", False):
             return None
-        if eventName == 'AFFILIATE_IPADDR' \
-                and not self.opts.get('checkaffiliates', False):
+        if eventName == "AFFILIATE_IPADDR" and not self.opts.get("checkaffiliates", False):
             return None
 
         for check in list(malchecks.keys()):
-            cid = malchecks[check]['id']
+            cid = malchecks[check]["id"]
 
-            if eventName in ['IP_ADDRESS', 'AFFILIATE_IPADDR']:
-                typeId = 'ip'
-                if eventName == 'IP_ADDRESS':
-                    evtType = 'MALICIOUS_IPADDR'
+            if eventName in ["IP_ADDRESS", "AFFILIATE_IPADDR"]:
+                typeId = "ip"
+                if eventName == "IP_ADDRESS":
+                    evtType = "MALICIOUS_IPADDR"
                 else:
-                    evtType = 'MALICIOUS_AFFILIATE_IPADDR'
+                    evtType = "MALICIOUS_AFFILIATE_IPADDR"
 
-            if eventName in ['BGP_AS_OWNER', 'BGP_AS_MEMBER']:
-                typeId = 'asn'
-                evtType = 'MALICIOUS_ASN'
+            if eventName in ["BGP_AS_OWNER", "BGP_AS_MEMBER"]:
+                typeId = "asn"
+                evtType = "MALICIOUS_ASN"
 
-            if eventName in ['INTERNET_NAME', 'CO_HOSTED_SITE',
-                             'AFFILIATE_INTERNET_NAME']:
-                typeId = 'domain'
+            if eventName in ["INTERNET_NAME", "CO_HOSTED_SITE", "AFFILIATE_INTERNET_NAME"]:
+                typeId = "domain"
                 if eventName == "INTERNET_NAME":
                     evtType = "MALICIOUS_INTERNET_NAME"
-                if eventName == 'AFFILIATE_INTERNET_NAME':
-                    evtType = 'MALICIOUS_AFFILIATE_INTERNET_NAME'
-                if eventName == 'CO_HOSTED_SITE':
-                    evtType = 'MALICIOUS_COHOST'
+                if eventName == "AFFILIATE_INTERNET_NAME":
+                    evtType = "MALICIOUS_AFFILIATE_INTERNET_NAME"
+                if eventName == "CO_HOSTED_SITE":
+                    evtType = "MALICIOUS_COHOST"
 
             url = self.lookupItem(cid, typeId, eventData)
 
@@ -232,5 +224,6 @@ class sfp_openphish(SpiderFootPlugin):
                 text = f"{check} [{eventData}]\n<SFURL>{url}</SFURL>"
                 evt = SpiderFootEvent(evtType, text, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_openphish class

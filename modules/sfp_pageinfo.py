@@ -18,24 +18,26 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 
 # Indentify pages that use Javascript libs, handle passwords, have forms,
 # permit file uploads and more to come.
-regexps = dict({
-    'URL_JAVASCRIPT': list(['text/javascript', '<script ']),
-    'URL_FORM': list(['<form ', 'method=[PG]', '<input ']),
-    'URL_PASSWORD': list(['<input.*type=[\"\']*password']),
-    'URL_UPLOAD': list(['type=[\"\']*file']),
-    'URL_JAVA_APPLET': list(['<applet ']),
-    'URL_FLASH': list([r'\.swf[ \'\"]'])
-})
+regexps = dict(
+    {
+        "URL_JAVASCRIPT": list(["text/javascript", "<script "]),
+        "URL_FORM": list(["<form ", "method=[PG]", "<input "]),
+        "URL_PASSWORD": list(["<input.*type=[\"']*password"]),
+        "URL_UPLOAD": list(["type=[\"']*file"]),
+        "URL_JAVA_APPLET": list(["<applet "]),
+        "URL_FLASH": list([r"\.swf[ \'\"]"]),
+    }
+)
 
 
 class sfp_pageinfo(SpiderFootPlugin):
 
     meta = {
-        'name': "Page Information",
-        'summary': "Obtain information about web pages (do they take passwords, do they contain forms, etc.)",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Page Information",
+        "summary": "Obtain information about web pages (do they take passwords, do they contain forms, etc.)",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
@@ -60,8 +62,16 @@ class sfp_pageinfo(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["URL_STATIC", "URL_JAVASCRIPT", "URL_FORM", "URL_PASSWORD",
-                "URL_UPLOAD", "URL_JAVA_APPLET", "URL_FLASH", "PROVIDER_JAVASCRIPT"]
+        return [
+            "URL_STATIC",
+            "URL_JAVASCRIPT",
+            "URL_FORM",
+            "URL_PASSWORD",
+            "URL_UPLOAD",
+            "URL_JAVA_APPLET",
+            "URL_FLASH",
+            "PROVIDER_JAVASCRIPT",
+        ]
 
     # Handle events sent to this module
     def handleEvent(self, event):
@@ -112,11 +122,11 @@ class sfp_pageinfo(SpiderFootPlugin):
             self.notifyListeners(evt)
 
         # Check for externally referenced Javascript pages
-        pat = re.compile("<script.*src=[\'\"]?([^\'\">]*)", re.IGNORECASE)
+        pat = re.compile("<script.*src=['\"]?([^'\">]*)", re.IGNORECASE)
         matches = re.findall(pat, eventData)
         if len(matches) > 0:
             for match in matches:
-                if '://' not in match:
+                if "://" not in match:
                     continue
                 if not self.sf.urlFQDN(match):
                     continue
@@ -125,5 +135,6 @@ class sfp_pageinfo(SpiderFootPlugin):
                 self.sf.debug("Externally hosted JavaScript found at: %s" % match)
                 evt = SpiderFootEvent("PROVIDER_JAVASCRIPT", match, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_pageinfo class

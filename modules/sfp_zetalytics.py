@@ -182,9 +182,7 @@ class sfp_zetalytics(SpiderFootPlugin):
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "":
-            self.sf.error(
-                f"You enabled {self.__class__.__name__} but did not set an API key!"
-            )
+            self.sf.error(f"You enabled {self.__class__.__name__} but did not set an API key!")
             self.errorState = True
             return
 

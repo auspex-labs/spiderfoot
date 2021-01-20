@@ -19,33 +19,29 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_cloudflaredns(SpiderFootPlugin):
 
     meta = {
-        'name': "CloudFlare Malware DNS",
-        'summary': "Check if a host would be blocked by CloudFlare Malware-blocking DNS",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.cloudflare.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://developers.cloudflare.com/1.1.1.1/1.1.1.1-for-families/"
-            ],
-            'favIcon': "https://www.cloudflare.com/img/favicon/favicon-32x32.png",
-            'logo': "https://www.cloudflare.com/img/logo-web-badges/cf-logo-on-white-bg.svg",
-            'description': "1.1.1.1 for Families is the easiest way to add a layer of protection to "
+        "name": "CloudFlare Malware DNS",
+        "summary": "Check if a host would be blocked by CloudFlare Malware-blocking DNS",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.cloudflare.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://developers.cloudflare.com/1.1.1.1/1.1.1.1-for-families/"],
+            "favIcon": "https://www.cloudflare.com/img/favicon/favicon-32x32.png",
+            "logo": "https://www.cloudflare.com/img/logo-web-badges/cf-logo-on-white-bg.svg",
+            "description": "1.1.1.1 for Families is the easiest way to add a layer of protection to "
             "your home network and protect it from malware and adult content. "
             "1.1.1.1 for Families leverages Cloudflare’s global network to ensure "
             "that it is fast and secure around the world.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -64,8 +60,7 @@ class sfp_cloudflaredns(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME",
-                "MALICIOUS_COHOST"]
+        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME", "MALICIOUS_COHOST"]
 
     def queryAddr(self, qaddr):
         res = dns.resolver.Resolver()
@@ -115,8 +110,8 @@ class sfp_cloudflaredns(SpiderFootPlugin):
             if eventName == "CO_HOSTED_SITE":
                 typ = "MALICIOUS_COHOST"
             if not found:
-                evt = SpiderFootEvent(typ, "Blocked by CloudFlare DNS [" + eventData + "]",
-                                      self.__name__, parentEvent)
+                evt = SpiderFootEvent(typ, "Blocked by CloudFlare DNS [" + eventData + "]", self.__name__, parentEvent)
                 self.notifyListeners(evt)
+
 
 # End of sfp_cloudflaredns class

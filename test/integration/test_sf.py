@@ -9,9 +9,7 @@ class TestSf(unittest.TestCase):
     Test TestSf
     """
 
-    default_types = [
-        ""
-    ]
+    default_types = [""]
 
     default_modules = [
         "sfp_base64",
@@ -70,7 +68,7 @@ class TestSf(unittest.TestCase):
     def test_l_arg_should_start_web_server(self):
         listen = "127.0.0.1:5001"
         out, err, code = self.execute([sys.executable, "sf.py", "-l", listen])
-        self.assertIn(bytes(f"Starting web server at {listen}", 'utf-8'), err)
+        self.assertIn(bytes(f"Starting web server at {listen}", "utf-8"), err)
         self.assertEqual(0, code)
 
     def test_debug_arg_should_enable_and_print_debug_output(self):
@@ -80,9 +78,9 @@ class TestSf(unittest.TestCase):
         self.assertEqual(0, code)
 
     def test_run_scan_invalid_target_should_exit(self):
-        invalid_target = '.'
+        invalid_target = "."
         out, err, code = self.execute([sys.executable, "sf.py", "-s", invalid_target])
-        self.assertIn(bytes(f"Could not determine target type. Invalid target: {invalid_target}", 'utf-8'), err)
+        self.assertIn(bytes(f"Could not determine target type. Invalid target: {invalid_target}", "utf-8"), err)
         self.assertEqual(255, code)
 
     def test_run_scan_with_modules_no_target_should_exit(self):
@@ -98,7 +96,7 @@ class TestSf(unittest.TestCase):
     def test_run_scan_with_invalid_module_should_run_scan_and_exit(self):
         module = "invalid module"
         out, err, code = self.execute([sys.executable, "sf.py", "-m", module, "-s", "spiderfoot.net"])
-        self.assertIn(bytes(f"Failed to load module: {module}", 'utf-8'), err)
+        self.assertIn(bytes(f"Failed to load module: {module}", "utf-8"), err)
         self.assertEqual(0, code)
 
     def test_run_scan_with_invalid_type_should_exit(self):
@@ -134,4 +132,4 @@ class TestSf(unittest.TestCase):
             "sfp_countryname,Country Name,spiderfoot.net,United States\n",
         ]
         for output in expected_output:
-            self.assertIn(bytes(output, 'utf-8'), out)
+            self.assertIn(bytes(output, "utf-8"), out)

@@ -82,9 +82,7 @@ class sfp_ipregistry(SpiderFootPlugin):
         try:
             info = json.loads(res["content"])
         except Exception as e:
-            self.sf.error(
-                f"Error processing JSON response from {self.meta['name']}: {e}"
-            )
+            self.sf.error(f"Error processing JSON response from {self.meta['name']}: {e}")
             return None
 
         return info
@@ -132,9 +130,7 @@ class sfp_ipregistry(SpiderFootPlugin):
     def generate_security_events(self, security, pevent):
         if not isinstance(security, dict):
             return
-        malicious = any(
-            security.get(k) for k in ("is_abuser", "is_attacker", "is_threat")
-        )
+        malicious = any(security.get(k) for k in ("is_abuser", "is_attacker", "is_threat"))
         if malicious:
             self.emit("MALICIOUS_IPADDR", f"ipregistry [{pevent.data}]", pevent)
 

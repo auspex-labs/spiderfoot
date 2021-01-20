@@ -24,38 +24,30 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_phishstats(SpiderFootPlugin):
 
     meta = {
-        'name': "PhishStats",
-        'summary': "Determine if an IP Address is malicious",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://phishstats.info/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://phishstats.info/#apidoc"
-            ],
-            'favIcon': "https://phishstats.info/phish.ico",
-            'logo': "",
-            'description': "PhishStats - is a real time Phishing database that gathers phishing URLs from several sources.",
-        }
+        "name": "PhishStats",
+        "summary": "Determine if an IP Address is malicious",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://phishstats.info/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://phishstats.info/#apidoc"],
+            "favIcon": "https://phishstats.info/phish.ico",
+            "logo": "",
+            "description": "PhishStats - is a real time Phishing database that gathers phishing URLs from several sources.",
+        },
     }
 
-    opts = {
-        'checkaffiliates': True,
-        'subnetlookup': False,
-        'netblocklookup': True,
-        'maxnetblock': 24,
-        'maxsubnet': 24
-    }
+    opts = {"checkaffiliates": True, "subnetlookup": False, "netblocklookup": True, "maxnetblock": 24, "maxsubnet": 24}
 
     # Option descriptions. Delete any options not applicable to this module.
     optdescs = {
-        'checkaffiliates': "Check affiliates?",
-        'subnetlookup': "Look up all IPs on subnets which your target is a part of?",
-        'netblocklookup': "Look up all IPs on netblocks deemed to be owned by your target for possible blacklisted hosts on the same target subdomain/domain?",
-        'maxnetblock': "If looking up owned netblocks, the maximum netblock size to look up all IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
-        'maxsubnet': "If looking up subnets, the maximum subnet size to look up all the IPs within (CIDR value, 24 = /24, 16 = /16, etc.)"
+        "checkaffiliates": "Check affiliates?",
+        "subnetlookup": "Look up all IPs on subnets which your target is a part of?",
+        "netblocklookup": "Look up all IPs on netblocks deemed to be owned by your target for possible blacklisted hosts on the same target subdomain/domain?",
+        "maxnetblock": "If looking up owned netblocks, the maximum netblock size to look up all IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
+        "maxsubnet": "If looking up subnets, the maximum subnet size to look up all the IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
     }
 
     results = None
@@ -71,47 +63,34 @@ class sfp_phishstats(SpiderFootPlugin):
     # What events is this module interested in for input
     # For a list of all events, check sfdb.py.
     def watchedEvents(self):
-        return [
-            "IP_ADDRESS",
-            "NETBLOCK_OWNER",
-            "NETBLOCK_MEMBER",
-            "AFFILIATE_IPADDR"
-        ]
+        return ["IP_ADDRESS", "NETBLOCK_OWNER", "NETBLOCK_MEMBER", "AFFILIATE_IPADDR"]
 
     # What events this module produces
     def producedEvents(self):
-        return [
-            "IP_ADDRESS",
-            "MALICIOUS_IPADDR",
-            "RAW_RIR_DATA",
-            "MALICIOUS_AFFILIATE_IPADDR"
-        ]
+        return ["IP_ADDRESS", "MALICIOUS_IPADDR", "RAW_RIR_DATA", "MALICIOUS_AFFILIATE_IPADDR"]
 
     # Check whether the IP Address is malicious using Phishstats API
     # https://phishstats.info/
     def queryIPAddress(self, qry):
-        params = {
-            '_where': "(ip,eq," + qry.encode('raw_unicode_escape').decode("ascii", errors='replace') + ")",
-            '_size': 1
-        }
+        params = {"_where": "(ip,eq," + qry.encode("raw_unicode_escape").decode("ascii", errors="replace") + ")", "_size": 1}
 
         headers = {
-            'Accept': "application/json",
+            "Accept": "application/json",
         }
 
         res = self.sf.fetchUrl(
-            'https://phishstats.info:2096/api/phishing?' + urllib.parse.urlencode(params),
+            "https://phishstats.info:2096/api/phishing?" + urllib.parse.urlencode(params),
             headers=headers,
             timeout=15,
-            useragent=self.opts['_useragent']
+            useragent=self.opts["_useragent"],
         )
 
-        if not res['code'] == "200":
+        if not res["code"] == "200":
             self.sf.debug("No information found from Phishstats for IP Address")
             return None
 
         try:
-            return json.loads(res['content'])
+            return json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response: {e}")
             return None
@@ -134,24 +113,30 @@ class sfp_phishstats(SpiderFootPlugin):
 
         self.results[eventData] = True
 
-        if eventName == 'NETBLOCK_OWNER':
-            if not self.opts['netblocklookup']:
+        if eventName == "NETBLOCK_OWNER":
+            if not self.opts["netblocklookup"]:
                 return
 
-            if IPNetwork(eventData).prefixlen < self.opts['maxnetblock']:
-                self.sf.debug("Network size bigger than permitted: "
-                              + str(IPNetwork(eventData).prefixlen) + " > "
-                              + str(self.opts['maxnetblock']))
+            if IPNetwork(eventData).prefixlen < self.opts["maxnetblock"]:
+                self.sf.debug(
+                    "Network size bigger than permitted: "
+                    + str(IPNetwork(eventData).prefixlen)
+                    + " > "
+                    + str(self.opts["maxnetblock"])
+                )
                 return
 
-        if eventName == 'NETBLOCK_MEMBER':
-            if not self.opts['subnetlookup']:
+        if eventName == "NETBLOCK_MEMBER":
+            if not self.opts["subnetlookup"]:
                 return
 
-            if IPNetwork(eventData).prefixlen < self.opts['maxsubnet']:
-                self.sf.debug("Network size bigger than permitted: "
-                              + str(IPNetwork(eventData).prefixlen) + " > "
-                              + str(self.opts['maxsubnet']))
+            if IPNetwork(eventData).prefixlen < self.opts["maxsubnet"]:
+                self.sf.debug(
+                    "Network size bigger than permitted: "
+                    + str(IPNetwork(eventData).prefixlen)
+                    + " > "
+                    + str(self.opts["maxsubnet"])
+                )
                 return
 
         qrylist = list()
@@ -161,7 +146,7 @@ class sfp_phishstats(SpiderFootPlugin):
                 self.results[str(ipaddr)] = True
         else:
             # If user has enabled affiliate checking
-            if eventName == "AFFILIATE_IPADDR" and not self.opts['checkaffiliates']:
+            if eventName == "AFFILIATE_IPADDR" and not self.opts["checkaffiliates"]:
                 return
             qrylist.append(eventData)
 
@@ -176,7 +161,7 @@ class sfp_phishstats(SpiderFootPlugin):
                 break
 
             try:
-                maliciousIP = data[0].get('ip')
+                maliciousIP = data[0].get("ip")
             except Exception:
                 # If ArrayIndex is out of bounds then data doesn't exist
                 continue
@@ -215,5 +200,6 @@ class sfp_phishstats(SpiderFootPlugin):
                 evt = SpiderFootEvent("MALICIOUS_IPADDR", maliciousIPDesc, self.__name__, event)
 
             self.notifyListeners(evt)
+
 
 # End of sfp_phishstats class

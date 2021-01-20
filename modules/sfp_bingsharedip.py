@@ -18,38 +18,30 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_bingsharedip(SpiderFootPlugin):
 
     meta = {
-        'name': "Bing (Shared IPs)",
-        'summary': "Search Bing for hosts sharing the same IP.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Search Engines"],
-        'dataSource': {
-            'website': "https://www.bing.com/",
-            'model': "FREE_AUTH_LIMITED",
-            'references': [
-                "https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/"
-            ],
-            'apiKeyInstructions': [
+        "name": "Bing (Shared IPs)",
+        "summary": "Search Bing for hosts sharing the same IP.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Search Engines"],
+        "dataSource": {
+            "website": "https://www.bing.com/",
+            "model": "FREE_AUTH_LIMITED",
+            "references": ["https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/"],
+            "apiKeyInstructions": [
                 "Visit https://azure.microsoft.com/en-in/services/cognitive-services/bing-web-search-api/",
                 "Register a free account",
                 "Select on Bing Custom Search",
-                "The API keys are listed under 'Key1' and 'Key2' (both should work)"
+                "The API keys are listed under 'Key1' and 'Key2' (both should work)",
             ],
-            'favIcon': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'logo': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'description': "The Bing Search APIs let you build web-connected apps and services that "
+            "favIcon": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "logo": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "description": "The Bing Search APIs let you build web-connected apps and services that "
             "find webpages, images, news, locations, and more without advertisements.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        "cohostsamedomain": False,
-        "pages": 20,
-        "verify": True,
-        "maxcohost": 100,
-        "api_key": ""
-    }
+    opts = {"cohostsamedomain": False, "pages": 20, "verify": True, "maxcohost": 100, "api_key": ""}
 
     # Option descriptions
     optdescs = {
@@ -57,7 +49,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
         "pages": "Number of max bing results to request from API.",
         "verify": "Verify co-hosts are valid by checking if they still resolve to the shared IP.",
         "maxcohost": "Stop reporting co-hosted sites after this many are found, as it would likely indicate web hosting.",
-        "api_key": "Bing API Key for shared IP search."
+        "api_key": "Bing API Key for shared IP search.",
     }
 
     results = None
@@ -96,7 +88,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
 
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
-        if self.opts['api_key'] == "" and self.opts['api_key'] == "":
+        if self.opts["api_key"] == "" and self.opts["api_key"] == "":
             self.sf.error("You enabled sfp_bingsharedip but did not set a Bing API key!")
             self.errorState = True
             return None
@@ -152,9 +144,7 @@ class sfp_bingsharedip(SpiderFootPlugin):
                 if site not in myres and site != ip:
                     if not self.opts["cohostsamedomain"]:
                         if self.getTarget().matches(site, includeParents=True):
-                            self.sf.debug(
-                                f"Skipping {site} because it is on the same domain."
-                            )
+                            self.sf.debug(f"Skipping {site} because it is on the same domain.")
                             continue
                     if self.opts["verify"] and not self.sf.validateIP(site, ip):
                         self.sf.debug(f"Host {site} no longer resolves to {ip}")
@@ -164,22 +154,16 @@ class sfp_bingsharedip(SpiderFootPlugin):
                     if eventName == "NETBLOCK_OWNER":
                         ipe = SpiderFootEvent("IP_ADDRESS", ip, self.__name__, event)
                         self.notifyListeners(ipe)
-                        evt = SpiderFootEvent(
-                            "CO_HOSTED_SITE", site, self.__name__, ipe
-                        )
+                        evt = SpiderFootEvent("CO_HOSTED_SITE", site, self.__name__, ipe)
                         self.notifyListeners(evt)
                     else:
-                        evt = SpiderFootEvent(
-                            "CO_HOSTED_SITE", site, self.__name__, event
-                        )
+                        evt = SpiderFootEvent("CO_HOSTED_SITE", site, self.__name__, event)
                         self.notifyListeners(evt)
                     self.cohostcount += 1
                     myres.append(site)
 
             if urls:
-                evt = SpiderFootEvent(
-                    "RAW_RIR_DATA", str(res), self.__name__, event
-                )
+                evt = SpiderFootEvent("RAW_RIR_DATA", str(res), self.__name__, event)
                 self.notifyListeners(evt)
 
 

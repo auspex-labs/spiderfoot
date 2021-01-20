@@ -29,8 +29,7 @@ class sfp_dnsdb(SpiderFootPlugin):
             "model": "FREE_AUTH_LIMITED",
             "references": [
                 "https://docs.dnsdb.info/dnsdb-apiv2/",
-                "https://www.farsightsecurity.com/get-started/"
-                "https://www.farsightsecurity.com/solutions/dnsdb/",
+                "https://www.farsightsecurity.com/get-started/" "https://www.farsightsecurity.com/solutions/dnsdb/",
             ],
             "apiKeyInstructions": [
                 "Visit https://www.farsightsecurity.com/get-started/",
@@ -205,43 +204,33 @@ class sfp_dnsdb(SpiderFootPlugin):
                             self.sf.debug(f"Skipping invalid IP address {data}")
                             continue
 
-                        if self.opts["verify"] and not self.sf.validateIP(
-                            eventData, data
-                        ):
-                            self.sf.debug(
-                                f"Host {eventData} no longer resolves to {data}"
-                            )
+                        if self.opts["verify"] and not self.sf.validateIP(eventData, data):
+                            self.sf.debug(f"Host {eventData} no longer resolves to {data}")
                             continue
 
                         evt = SpiderFootEvent("IP_ADDRESS", data, self.__name__, event)
 
                     if record.get("rrtype") == "AAAA":
 
-                        if not self.getTarget().matches(
-                            data, includeChildren=True, includeParents=True
-                        ):
+                        if not self.getTarget().matches(data, includeChildren=True, includeParents=True):
                             continue
 
                         if not self.sf.validIP6(data):
                             self.sf.debug("Skipping invalid IPv6 address " + data)
                             continue
 
-                        if self.opts["verify"] and not self.sf.validateIP(
-                            eventData, data
-                        ):
-                            self.sf.debug(
-                                "Host " + eventData + " no longer resolves to " + data
-                            )
+                        if self.opts["verify"] and not self.sf.validateIP(eventData, data):
+                            self.sf.debug("Host " + eventData + " no longer resolves to " + data)
                             continue
 
                         evt = SpiderFootEvent("IPV6_ADDRESS", data, self.__name__, event)
                     elif record.get("rrtype") == "MX":
-                        data = re.sub(r'.*\s+(.*)', r'\1', data)
+                        data = re.sub(r".*\s+(.*)", r"\1", data)
                         evt = SpiderFootEvent("PROVIDER_MAIL", data, self.__name__, event)
                     elif record.get("rrtype") == "NS":
                         evt = SpiderFootEvent("PROVIDER_DNS", data, self.__name__, event)
                     elif record.get("rrtype") == "TXT":
-                        data = data.replace('"', '')
+                        data = data.replace('"', "")
                         evt = SpiderFootEvent("DNS_TEXT", data, self.__name__, event)
                     elif record.get("rrtype") == "CNAME":
                         if not self.getTarget().matches(data):
@@ -312,22 +301,19 @@ class sfp_dnsdb(SpiderFootPlugin):
                 self.notifyListeners(evt)
 
         for co in coHosts:
-            if eventName == "IP_ADDRESS" and (
-                self.opts["verify"] and not self.sf.validateIP(co, eventData)
-            ):
+            if eventName == "IP_ADDRESS" and (self.opts["verify"] and not self.sf.validateIP(co, eventData)):
                 self.sf.debug("Host no longer resolves to our IP.")
                 continue
 
             if not self.opts["cohostsamedomain"]:
                 if self.getTarget().matches(co, includeParents=True):
-                    self.sf.debug(
-                        "Skipping " + co + " because it is on the same domain."
-                    )
+                    self.sf.debug("Skipping " + co + " because it is on the same domain.")
                     continue
 
             if self.cohostcount < self.opts["maxcohost"]:
                 evt = SpiderFootEvent("CO_HOSTED_SITE", co, self.__name__, event)
                 self.notifyListeners(evt)
                 self.cohostcount += 1
+
 
 # End of sfp_dnsdb class

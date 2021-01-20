@@ -17,20 +17,18 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_creditcard(SpiderFootPlugin):
 
     meta = {
-        'name': "Credit Card Number Extractor",
-        'summary': "Identify Credit Card Numbers in any data",
-        'flags': ["errorprone"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Credit Card Number Extractor",
+        "summary": "Identify Credit Card Numbers in any data",
+        "flags": ["errorprone"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options.
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions.
-    optdescs = {
-    }
+    optdescs = {}
 
     # Tracking results can be helpful to avoid reporting/processing duplicates
     results = None
@@ -93,5 +91,6 @@ class sfp_creditcard(SpiderFootPlugin):
             else:
                 evt.moduleDataSource = "Unknown"
             self.notifyListeners(evt)
+
 
 # End of sfp_creditcard class

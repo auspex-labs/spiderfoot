@@ -1,7 +1,7 @@
 import logging
 
 
-class SpiderFootPlugin():
+class SpiderFootPlugin:
     """SpiderFootPlugin module object
 
     Attributes:
@@ -205,7 +205,7 @@ class SpiderFootPlugin():
         if self.__outputFilter__:
             # Be strict about what events to pass on, unless they are
             # the ROOT event or the event type of the target.
-            if eventName not in ('ROOT', self.getTarget().targetType):
+            if eventName not in ("ROOT", self.getTarget().targetType):
                 if eventName not in self.__outputFilter__:
                     return
 
@@ -242,7 +242,7 @@ class SpiderFootPlugin():
         self._listenerModules.sort(key=lambda m: m._priority)
 
         for listener in self._listenerModules:
-            if eventName not in listener.watchedEvents() and '*' not in listener.watchedEvents():
+            if eventName not in listener.watchedEvents() and "*" not in listener.watchedEvents():
                 continue
 
             if storeOnly and "__stor" not in listener.__module__:
@@ -290,7 +290,7 @@ class SpiderFootPlugin():
             list: list of events this modules watches
         """
 
-        return ['*']
+        return ["*"]
 
     def producedEvents(self):
         """What events this module produces
@@ -320,5 +320,6 @@ class SpiderFootPlugin():
         """
 
         return
+
 
 # end of SpiderFootPlugin class

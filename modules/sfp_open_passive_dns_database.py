@@ -23,23 +23,21 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_open_passive_dns_database(SpiderFootPlugin):
 
     meta = {
-        'name': "Open Passive DNS Database",
-        'summary': "Obtain passive DNS information from pdns.daloo.de Open passive DNS database.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Passive DNS"],
-        'dataSource': {
-            'website': "http://pdns.daloo.de/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "http://pdns.daloo.de/faq.php"
-            ],
-            'favIcon': "https://www.google.com/s2/favicons?domain=http://pdns.daloo.de/",
-            'logo': "https://www.google.com/s2/favicons?domain=http://pdns.daloo.de/",
-            'description': "This is a personal project to track DNS responses. "
+        "name": "Open Passive DNS Database",
+        "summary": "Obtain passive DNS information from pdns.daloo.de Open passive DNS database.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Passive DNS"],
+        "dataSource": {
+            "website": "http://pdns.daloo.de/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["http://pdns.daloo.de/faq.php"],
+            "favIcon": "https://www.google.com/s2/favicons?domain=http://pdns.daloo.de/",
+            "logo": "https://www.google.com/s2/favicons?domain=http://pdns.daloo.de/",
+            "description": "This is a personal project to track DNS responses. "
             "You can use the DNS resolver to add data to it or just browse what the crawler found. "
             "I mainly did it because I found no really open database.",
-        }
+        },
     }
 
     # Default options
@@ -77,23 +75,23 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
     def query(self, qry):
         params = {
             "alike": 1,  # alike is required to find subdomains
-            "q": qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
+            "q": qry.encode("raw_unicode_escape").decode("ascii", errors="replace"),
         }
 
-        url = 'https://pdns.daloo.de/search.php?' + urllib.parse.urlencode(params)
-        res = self.sf.fetchUrl(url, timeout=self.opts['timeout'], useragent=self.opts['_useragent'])
+        url = "https://pdns.daloo.de/search.php?" + urllib.parse.urlencode(params)
+        res = self.sf.fetchUrl(url, timeout=self.opts["timeout"], useragent=self.opts["_useragent"])
 
         time.sleep(1)
 
-        if res['code'] != "200":
+        if res["code"] != "200":
             self.sf.debug("Error retrieving search results.")
             return None
 
-        if res['content'] is None:
+        if res["content"] is None:
             self.sf.debug("No results found for " + qry)
             return None
 
-        rows = re.findall(r'<tr>(.+?)</tr>', res['content'], re.DOTALL)
+        rows = re.findall(r"<tr>(.+?)</tr>", res["content"], re.DOTALL)
 
         if not rows:
             self.sf.debug("No passive DNS results for " + qry)
@@ -102,7 +100,7 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
         data = list()
 
         for row in rows:
-            columns = re.findall(r'<td.*?>(.*?)</td>', row, re.DOTALL)
+            columns = re.findall(r"<td.*?>(.*?)</td>", row, re.DOTALL)
 
             # 0 seems to indicate no genuine issue
             if len(columns) == 0:
@@ -163,7 +161,7 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
             # count = record[6]
 
             # Extract queries and answers from HTML, and append all in-scope records to the domains list for parsing
-            r = re.findall(r'>(.+?)<', query_html, re.DOTALL)
+            r = re.findall(r">(.+?)<", query_html, re.DOTALL)
 
             if len(r) == 0:
                 continue
@@ -173,7 +171,7 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
             if self.getTarget().matches(query, includeChildren=True, includeParents=True):
                 domains.append(query)
 
-            r = re.findall(r'>(.+?)<', answer_html, re.DOTALL)
+            r = re.findall(r">(.+?)<", answer_html, re.DOTALL)
 
             if len(r) == 0:
                 continue
@@ -185,16 +183,16 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
 
             # Answers for these records types are ignored,
             # as all in-scope records have already been added to the domains list for parsing
-            if answer_type in ['PTR', 'NS', 'MX', 'CNAME', 'TXT', 'SOA']:
+            if answer_type in ["PTR", "NS", "MX", "CNAME", "TXT", "SOA"]:
                 continue
 
             if answer in self.results:
                 continue
 
-            if answer == 'NXDOMAIN':
+            if answer == "NXDOMAIN":
                 continue
 
-            if answer_type == 'A':
+            if answer_type == "A":
                 if not self.getTarget().matches(query, includeChildren=True, includeParents=True):
                     continue
 
@@ -202,14 +200,14 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
                     self.sf.debug("Skipping invalid IP address " + answer)
                     continue
 
-                if self.opts['verify'] and not self.sf.validateIP(query, answer):
+                if self.opts["verify"] and not self.sf.validateIP(query, answer):
                     self.sf.debug("Host " + query + " no longer resolves to " + answer)
                     continue
 
                 evt = SpiderFootEvent("IP_ADDRESS", answer, self.__name__, event)
                 self.notifyListeners(evt)
 
-            if answer_type == 'AAAA':
+            if answer_type == "AAAA":
                 if not self.getTarget().matches(query, includeChildren=True, includeParents=True):
                     continue
 
@@ -217,7 +215,7 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
                     self.sf.debug("Skipping invalid IPv6 address " + answer)
                     continue
 
-                if self.opts['verify'] and not self.sf.validateIP(query, answer):
+                if self.opts["verify"] and not self.sf.validateIP(query, answer):
                     self.sf.debug("Host " + query + " no longer resolves to " + answer)
                     continue
 
@@ -234,12 +232,13 @@ class sfp_open_passive_dns_database(SpiderFootPlugin):
             if not self.getTarget().matches(domain, includeChildren=True, includeParents=True):
                 continue
 
-            if self.opts['verify'] and not self.sf.resolveHost(domain):
+            if self.opts["verify"] and not self.sf.resolveHost(domain):
                 self.sf.debug(f"Host {domain} could not be resolved")
                 evt = SpiderFootEvent("INTERNET_NAME_UNRESOLVED", domain, self.__name__, event)
                 self.notifyListeners(evt)
             else:
                 evt = SpiderFootEvent("INTERNET_NAME", domain, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_open_passive_dns_database class

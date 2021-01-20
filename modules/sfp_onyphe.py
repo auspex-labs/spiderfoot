@@ -124,9 +124,7 @@ class sfp_onyphe(SpiderFootPlugin):
         try:
             info = json.loads(res["content"])
             if "status" in info and info["status"] == "nok":
-                self.sf.error(
-                    f"Unexpected error happened while requesting data from Onyphe. Error message: {info.get('text', '')}"
-                )
+                self.sf.error(f"Unexpected error happened while requesting data from Onyphe. Error message: {info.get('text', '')}")
                 self.errorState = True
                 return None
             elif "results" not in info or info["results"] == []:
@@ -140,17 +138,11 @@ class sfp_onyphe(SpiderFootPlugin):
         # Go through other pages if user has paid plan
         try:
             current_page = int(info["page"])
-            if (
-                self.opts["paid_plan"]
-                and info.get("page")
-                and int(info.get("max_page")) > current_page
-            ):
+            if self.opts["paid_plan"] and info.get("page") and int(info.get("max_page")) > current_page:
                 page = current_page + 1
 
                 if page > self.opts["max_page"]:
-                    self.sf.error(
-                        "Maximum number of pages from options for Onyphe reached."
-                    )
+                    self.sf.error("Maximum number of pages from options for Onyphe reached.")
                     return [info]
                 retarr.append(info)
                 response = self.query(endpoint, ip, page)
@@ -178,41 +170,35 @@ class sfp_onyphe(SpiderFootPlugin):
 
     def emitDomainData(self, response, eventData, event):
         domains = set()
-        if response.get("domain") is not None and isinstance(
-            response['domain'], list
-        ):
-            for dom in response['domain']:
+        if response.get("domain") is not None and isinstance(response["domain"], list):
+            for dom in response["domain"]:
                 domains.add(dom)
 
-        if response.get("subdomains") is not None and isinstance(
-            response["subdomains"], list
-        ):
+        if response.get("subdomains") is not None and isinstance(response["subdomains"], list):
             for subDomain in response["subdomains"]:
                 domains.add(subDomain)
 
         for domain in domains:
             if self.getTarget().matches(domain):
-                if self.opts['verify'] and self.sf.resolveHost(domain):
-                    evt = SpiderFootEvent('INTERNET_NAME', domain, self.__name__, event)
+                if self.opts["verify"] and self.sf.resolveHost(domain):
+                    evt = SpiderFootEvent("INTERNET_NAME", domain, self.__name__, event)
                 else:
-                    evt = SpiderFootEvent('INTERNET_NAME_UNRESOLVED', domain, self.__name__, event)
+                    evt = SpiderFootEvent("INTERNET_NAME_UNRESOLVED", domain, self.__name__, event)
                 self.notifyListeners(evt)
 
-                if self.sf.isDomain(domain, self.opts['_internettlds']):
-                    evt = SpiderFootEvent('DOMAIN_NAME', domain, self.__name__, event)
+                if self.sf.isDomain(domain, self.opts["_internettlds"]):
+                    evt = SpiderFootEvent("DOMAIN_NAME", domain, self.__name__, event)
                     self.notifyListeners(evt)
                 continue
 
-            if self.cohostcount < self.opts['maxcohost']:
+            if self.cohostcount < self.opts["maxcohost"]:
                 if self.opts["verify"] and not self.sf.validateIP(domain, eventData):
                     self.sf.debug("Host no longer resolves to our IP.")
                     continue
 
                 if not self.opts["cohostsamedomain"]:
                     if self.getTarget().matches(domain, includeParents=True):
-                        self.sf.debug(
-                            "Skipping " + domain + " because it is on the same domain."
-                        )
+                        self.sf.debug("Skipping " + domain + " because it is on the same domain.")
                         continue
 
                 evt = SpiderFootEvent("CO_HOSTED_SITE", domain, self.__name__, event)
@@ -266,9 +252,7 @@ class sfp_onyphe(SpiderFootPlugin):
         geoLocDataArr = self.query("geoloc", eventData)
 
         if geoLocDataArr is not None:
-            evt = SpiderFootEvent(
-                "RAW_RIR_DATA", str(geoLocDataArr), self.__name__, event
-            )
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(geoLocDataArr), self.__name__, event)
             self.notifyListeners(evt)
 
             for geoLocData in geoLocDataArr:
@@ -316,9 +300,7 @@ class sfp_onyphe(SpiderFootPlugin):
         pastriesDataArr = self.query("pastries", eventData)
 
         if pastriesDataArr is not None:
-            evt = SpiderFootEvent(
-                "RAW_RIR_DATA", str(pastriesDataArr), self.__name__, event
-            )
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(pastriesDataArr), self.__name__, event)
             self.notifyListeners(evt)
 
             for pastriesData in pastriesDataArr:
@@ -338,17 +320,13 @@ class sfp_onyphe(SpiderFootPlugin):
                     if not self.isFreshEnough(result):
                         continue
 
-                    evt = SpiderFootEvent(
-                        "LEAKSITE_CONTENT", pastry, self.__name__, event
-                    )
+                    evt = SpiderFootEvent("LEAKSITE_CONTENT", pastry, self.__name__, event)
                     self.notifyListeners(evt)
 
         threatListDataArr = self.query("threatlist", eventData)
 
         if threatListDataArr is not None:
-            evt = SpiderFootEvent(
-                "RAW_RIR_DATA", str(threatListDataArr), self.__name__, event
-            )
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(threatListDataArr), self.__name__, event)
             self.notifyListeners(evt)
 
             for threatListData in threatListDataArr:
@@ -380,9 +358,7 @@ class sfp_onyphe(SpiderFootPlugin):
         vulnerabilityDataArr = self.query("vulnscan", eventData)
 
         if vulnerabilityDataArr is not None:
-            evt = SpiderFootEvent(
-                "RAW_RIR_DATA", str(vulnerabilityDataArr), self.__name__, event
-            )
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(vulnerabilityDataArr), self.__name__, event)
             self.notifyListeners(evt)
 
             for vulnerabilityData in vulnerabilityDataArr:

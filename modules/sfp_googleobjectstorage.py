@@ -21,28 +21,22 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_googleobjectstorage(SpiderFootPlugin):
 
     meta = {
-        'name': "Google Object Storage Finder",
-        'summary': "Search for potential Google Object Storage buckets associated with the target and attempt to list their contents.",
-        'flags': [""],
-        'useCases': ["Footprint", "Passive"],
-        'categories': ["Crawling and Scanning"],
-        'dataSource': {
-            'website': "https://cloud.google.com/storage",
-            'model': "FREE_NOAUTH_UNLIMITED"
-        }
+        "name": "Google Object Storage Finder",
+        "summary": "Search for potential Google Object Storage buckets associated with the target and attempt to list their contents.",
+        "flags": [""],
+        "useCases": ["Footprint", "Passive"],
+        "categories": ["Crawling and Scanning"],
+        "dataSource": {"website": "https://cloud.google.com/storage", "model": "FREE_NOAUTH_UNLIMITED"},
     }
 
     # Default options
     opts = {
         "suffixes": "test,dev,web,beta,bucket,space,files,content,data,prod,staging,production,stage,app,media,development,-test,-dev,-web,-beta,-bucket,-space,-files,-content,-data,-prod,-staging,-production,-stage,-app,-media,-development",
-        "_maxthreads": 20
+        "_maxthreads": 20,
     }
 
     # Option descriptions
-    optdescs = {
-        "suffixes": "List of suffixes to append to domains tried as bucket names",
-        "_maxthreads": "Maximum threads"
-    }
+    optdescs = {"suffixes": "List of suffixes to append to domains tried as bucket names", "_maxthreads": "Maximum threads"}
 
     results = None
     gosresults = dict()
@@ -70,19 +64,19 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
     def checkSite(self, url):
         res = self.sf.fetchUrl(url, timeout=10, useragent="SpiderFoot", noLog=True)
 
-        if not res['content']:
+        if not res["content"]:
             return None
 
-        if "NoSuchBucket" in res['content']:
+        if "NoSuchBucket" in res["content"]:
             self.sf.debug(f"Not a valid bucket: {url}")
             return None
 
         # Bucket found
-        if res['code'] in ["301", "302", "200"]:
+        if res["code"] in ["301", "302", "200"]:
             # Bucket has files
-            if "ListBucketResult" in res['content']:
+            if "ListBucketResult" in res["content"]:
                 with self.lock:
-                    self.gosresults[url] = res['content'].count("<Key>")
+                    self.gosresults[url] = res["content"].count("<Key>")
             else:
                 # Bucket has no files
                 with self.lock:
@@ -100,8 +94,7 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
 
             self.sf.info("Spawning thread to check bucket: " + site)
             tname = str(random.SystemRandom().randint(0, 999999999))
-            t.append(threading.Thread(name='thread_sfp_googleobjectstorage_' + tname,
-                                      target=self.checkSite, args=(site,)))
+            t.append(threading.Thread(name="thread_sfp_googleobjectstorage_" + tname, target=self.checkSite, args=(site,)))
             t[i].start()
             i += 1
 
@@ -126,7 +119,7 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
         siteList = list()
 
         for site in sites:
-            if i >= self.opts['_maxthreads']:
+            if i >= self.opts["_maxthreads"]:
                 data = self.threadSites(siteList)
                 if data is None:
                     return res
@@ -163,14 +156,14 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
                 self.notifyListeners(evt)
             return None
 
-        targets = [eventData.replace('.', '')]
-        kw = self.sf.domainKeyword(eventData, self.opts['_internettlds'])
+        targets = [eventData.replace(".", "")]
+        kw = self.sf.domainKeyword(eventData, self.opts["_internettlds"])
         if kw:
             targets.append(kw)
 
         urls = list()
         for t in targets:
-            suffixes = [''] + self.opts['suffixes'].split(',')
+            suffixes = [""] + self.opts["suffixes"].split(",")
             for s in suffixes:
                 if self.checkForStop():
                     return None
@@ -187,8 +180,9 @@ class sfp_googleobjectstorage(SpiderFootPlugin):
             self.notifyListeners(evt)
             if bucket[2] != "0":
                 bucketname = bucket[1].replace("//", "")
-                evt = SpiderFootEvent("CLOUD_STORAGE_BUCKET_OPEN", bucketname + ": " + bucket[2] + " files found.",
-                                      self.__name__, evt)
+                evt = SpiderFootEvent(
+                    "CLOUD_STORAGE_BUCKET_OPEN", bucketname + ": " + bucket[2] + " files found.", self.__name__, evt
+                )
                 self.notifyListeners(evt)
 
 

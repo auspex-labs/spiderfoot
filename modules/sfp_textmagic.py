@@ -26,15 +26,13 @@ class sfp_textmagic(SpiderFootPlugin):
         "dataSource": {
             "website": "https://www.textmagic.com/",
             "model": "FREE_AUTH_LIMITED",
-            "references": [
-                "https://docs.textmagic.com/"
-            ],
+            "references": ["https://docs.textmagic.com/"],
             "apiKeyInstructions": [
                 "Visit https://textmagic.com",
                 "Register a free trial account",
                 "Visit https://my.textmagic.com/online/api/rest-api/keys",
                 "Click on 'Add new API Key'",
-                "Your API key will be listed beside 'The new API Key is'"
+                "Your API key will be listed beside 'The new API Key is'",
             ],
             "favIcon": "https://www.textmagic.com/wp-content/themes/textmagic-genesis/assets/app/images/favicon.png",
             "logo": "https://www.textmagic.com/wp-content/uploads/2015/04/logo.png",
@@ -63,15 +61,10 @@ class sfp_textmagic(SpiderFootPlugin):
         self.opts.update(userOpts)
 
     def watchedEvents(self):
-        return [
-            "PHONE_NUMBER"
-        ]
+        return ["PHONE_NUMBER"]
 
     def producedEvents(self):
-        return [
-            "PHONE_NUMBER_TYPE",
-            "RAW_RIR_DATA"
-        ]
+        return ["PHONE_NUMBER_TYPE", "RAW_RIR_DATA"]
 
     def handle_error_response(self, qry, res):
         try:
@@ -89,10 +82,7 @@ class sfp_textmagic(SpiderFootPlugin):
         self.sf.error(f"Failed to get results for {qry}, code {res['code']}{error_str}")
 
     def queryPhoneNumber(self, qry):
-        headers = {
-            'X-TM-Username': self.opts['api_key_username'],
-            'X-TM-Key': self.opts['api_key']
-        }
+        headers = {"X-TM-Username": self.opts["api_key_username"], "X-TM-Key": self.opts["api_key"]}
 
         res = self.sf.fetchUrl(
             f"https://rest.textmagic.com/api/v2/lookups/{qry}",
@@ -105,12 +95,12 @@ class sfp_textmagic(SpiderFootPlugin):
             self.handle_error_response(qry, res)
             return None
 
-        if res['content'] is None:
+        if res["content"] is None:
             self.sf.info(f"No TextMagic info found for {qry}")
             return None
 
         try:
-            return json.loads(res['content'])
+            return json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response from TextMagic: {e}")
 
@@ -127,9 +117,7 @@ class sfp_textmagic(SpiderFootPlugin):
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "" or self.opts["api_key_username"] == "":
-            self.sf.error(
-                f"You enabled {self.__class__.__name__} but did not set an API Username/Key!"
-            )
+            self.sf.error(f"You enabled {self.__class__.__name__} but did not set an API Username/Key!")
             self.errorState = True
             return None
 
@@ -147,5 +135,6 @@ class sfp_textmagic(SpiderFootPlugin):
 
             evt = SpiderFootEvent("PHONE_NUMBER_TYPE", phoneNumberType, self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_textmagic class

@@ -17,43 +17,37 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_iknowwhatyoudownload(SpiderFootPlugin):
 
     meta = {
-        'name': "Iknowwhatyoudownload.com",
-        'summary': "Check iknowwhatyoudownload.com for IP addresses that have been using BitTorrent.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Secondary Networks"],
-        'dataSource': {
-            'website': "https://iknowwhatyoudownload.com/en/peer/",
-            'model': "FREE_AUTH_LIMITED",
-            'references': [
+        "name": "Iknowwhatyoudownload.com",
+        "summary": "Check iknowwhatyoudownload.com for IP addresses that have been using BitTorrent.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Secondary Networks"],
+        "dataSource": {
+            "website": "https://iknowwhatyoudownload.com/en/peer/",
+            "model": "FREE_AUTH_LIMITED",
+            "references": [
                 "https://iknowwhatyoudownload.com/en/api/",
                 "https://iknowwhatyoudownload.com/en/link/",
-                "https://iknowwhatyoudownload.com/en/peer/"
+                "https://iknowwhatyoudownload.com/en/peer/",
             ],
-            'apiKeyInstructions': [
+            "apiKeyInstructions": [
                 "Visit https://iknowwhatyoudownload.com/en/api/",
                 "Request Demo Key with email id",
-                "The API key will be sent to your email"
+                "The API key will be sent to your email",
             ],
-            'favIcon': "https://iknowwhatyoudownload.com/assets/img/utorrent2.png",
-            'logo': "https://iknowwhatyoudownload.com/assets/img/logo.png",
-            'description': "Our system collects torrent files in two ways: parsing torrent sites, and listening DHT network. "
+            "favIcon": "https://iknowwhatyoudownload.com/assets/img/utorrent2.png",
+            "logo": "https://iknowwhatyoudownload.com/assets/img/logo.png",
+            "description": "Our system collects torrent files in two ways: parsing torrent sites, and listening DHT network. "
             "We have more than 1.500.000 torrents which where classified and which are using now "
             "for collecting peer sharing facts (up to 200.000.000 daily).",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        "daysback": 30,
-        "api_key": ""
-    }
+    opts = {"daysback": 30, "api_key": ""}
 
     # Option descriptions
-    optdescs = {
-        "daysback": "How far back (in days) to look for activity.",
-        "api_key": "Iknowwhatyoudownload.com API key."
-    }
+    optdescs = {"daysback": "How far back (in days) to look for activity.", "api_key": "Iknowwhatyoudownload.com API key."}
 
     # Be sure to completely clear any class variables in setup()
     # or you run the risk of data persisting between scan runs.
@@ -89,36 +83,38 @@ class sfp_iknowwhatyoudownload(SpiderFootPlugin):
         retdata = None
 
         url = "https://api.antitor.com/history/peer/?ip="
-        url += qry + "&days=" + str(self.opts['daysback'])
-        url += "&key=" + self.opts['api_key']
+        url += qry + "&days=" + str(self.opts["daysback"])
+        url += "&key=" + self.opts["api_key"]
 
-        res = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'], useragent="SpiderFoot")
+        res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent="SpiderFoot")
 
-        if res['code'] in ["403", "500"]:
+        if res["code"] in ["403", "500"]:
             self.sf.info("Unable to fetch data from iknowwhatyoudownload.com right now.")
             return None
 
         try:
-            ret = json.loads(res['content'])
+            ret = json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response from iknowwhatyoudownload.com: {e}")
             return None
 
-        if 'error' in ret:
-            if ret['error'] == "INVALID_DAYS":
+        if "error" in ret:
+            if ret["error"] == "INVALID_DAYS":
                 self.errorState = True
-                self.sf.error("The number of days you have configured is not accepted. If you have the demo key, try 30 days or less.")
+                self.sf.error(
+                    "The number of days you have configured is not accepted. If you have the demo key, try 30 days or less."
+                )
                 return None
 
-        if 'contents' not in ret:
+        if "contents" not in ret:
             return None
 
-        if not len(ret['contents']):
+        if not len(ret["contents"]):
             return None
 
         retdata = "<SFURL>https://iknowwhatyoudownload.com/en/peer/?ip=" + qry + "</SFURL>\n"
-        for d in ret['contents']:
-            retdata += d['torrent']['name'] + " (" + d.get("endDate", "Date unknown") + ")\n"
+        for d in ret["contents"]:
+            retdata += d["torrent"]["name"] + " (" + d.get("endDate", "Date unknown") + ")\n"
 
         return retdata
 
@@ -133,7 +129,7 @@ class sfp_iknowwhatyoudownload(SpiderFootPlugin):
         if self.errorState:
             return None
 
-        if self.opts['api_key'] == "":
+        if self.opts["api_key"] == "":
             self.sf.error("You enabled sfp_iknowwhatyoudownload but did not set an API key!")
             self.errorState = True
             return None
@@ -152,5 +148,6 @@ class sfp_iknowwhatyoudownload(SpiderFootPlugin):
 
         e = SpiderFootEvent("MALICIOUS_IPADDR", data, self.__name__, event)
         self.notifyListeners(e)
+
 
 # End of sfp_iknowwhatyoudownload class

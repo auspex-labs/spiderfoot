@@ -19,32 +19,28 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_yandexdns(SpiderFootPlugin):
 
     meta = {
-        'name': "Yandex DNS",
-        'summary': "Check if a host would be blocked by Yandex DNS",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://yandex.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://tech.yandex.com/"
-            ],
-            'favIcon': "https://yastatic.net/iconostasis/_/tToKamh-mh5XlViKpgiJRQgjz1Q.png",
-            'logo': "https://yastatic.net/iconostasis/_/tToKamh-mh5XlViKpgiJRQgjz1Q.png",
-            'description': "Yandex is a technology company that builds intelligent products and services powered by machine learning. "
+        "name": "Yandex DNS",
+        "summary": "Check if a host would be blocked by Yandex DNS",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://yandex.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://tech.yandex.com/"],
+            "favIcon": "https://yastatic.net/iconostasis/_/tToKamh-mh5XlViKpgiJRQgjz1Q.png",
+            "logo": "https://yastatic.net/iconostasis/_/tToKamh-mh5XlViKpgiJRQgjz1Q.png",
+            "description": "Yandex is a technology company that builds intelligent products and services powered by machine learning. "
             "Our goal is to help consumers and businesses better navigate the online and offline world. "
             "Since 1997, we have delivered world-class, locally relevant search and information services.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -63,8 +59,7 @@ class sfp_yandexdns(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME",
-                "MALICIOUS_COHOST"]
+        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME", "MALICIOUS_COHOST"]
 
     # Query Yandex DNS "safe" servers
     # https://dns.yandex.com/advanced/
@@ -120,8 +115,8 @@ class sfp_yandexdns(SpiderFootPlugin):
         else:
             typ = "MALICIOUS_" + eventName
 
-        evt = SpiderFootEvent(typ, "Blocked by Yandex [" + eventData + "]",
-                              self.__name__, parentEvent)
+        evt = SpiderFootEvent(typ, "Blocked by Yandex [" + eventData + "]", self.__name__, parentEvent)
         self.notifyListeners(evt)
+
 
 # End of sfp_yandexdns class

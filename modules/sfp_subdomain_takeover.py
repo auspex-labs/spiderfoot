@@ -20,20 +20,18 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_subdomain_takeover(SpiderFootPlugin):
 
     meta = {
-        'name': "Subdomain Takeover Checker",
-        'summary': "Check if affiliated subdomains are vulnerable to takeover.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate"],
-        'categories': ["Crawling and Scanning"]
+        "name": "Subdomain Takeover Checker",
+        "summary": "Check if affiliated subdomains are vulnerable to takeover.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate"],
+        "categories": ["Crawling and Scanning"],
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
     errorState = False
@@ -53,13 +51,13 @@ class sfp_subdomain_takeover(SpiderFootPlugin):
             url = "https://raw.githubusercontent.com/haccer/subjack/master/fingerprints.json"
             res = self.sf.fetchUrl(url, useragent="SpiderFoot")
 
-            if res['content'] is None:
+            if res["content"] is None:
                 self.sf.error("Unable to fetch %s" % url)
                 self.errorState = True
                 return
 
-            self.sf.cachePut("subjack-fingerprints", res['content'])
-            content = res['content']
+            self.sf.cachePut("subjack-fingerprints", res["content"])
+            content = res["content"]
 
         try:
             self.fingerprints = json.loads(content)
@@ -108,17 +106,14 @@ class sfp_subdomain_takeover(SpiderFootPlugin):
 
                     for proto in ["https", "http"]:
                         res = self.sf.fetchUrl(
-                            "%s://%s/" % (proto, eventData),
-                            timeout=15,
-                            useragent=self.opts['_useragent'],
-                            verify=False
+                            "%s://%s/" % (proto, eventData), timeout=15, useragent=self.opts["_useragent"], verify=False
                         )
                         if not res:
                             continue
-                        if not res['content']:
+                        if not res["content"]:
                             continue
                         for fingerprint in fingerprints:
-                            if fingerprint in res['content']:
+                            if fingerprint in res["content"]:
                                 self.sf.info("%s appears to be vulnerable to takeover on %s" % (eventData, service))
                                 evt = SpiderFootEvent("AFFILIATE_INTERNET_NAME_HIJACKABLE", eventData, self.__name__, event)
                                 self.notifyListeners(evt)
@@ -139,5 +134,6 @@ class sfp_subdomain_takeover(SpiderFootPlugin):
                     self.sf.info("%s appears to be vulnerable to takeover on %s" % (eventData, service))
                     evt = SpiderFootEvent("AFFILIATE_INTERNET_NAME_HIJACKABLE", eventData, self.__name__, event)
                     self.notifyListeners(evt)
+
 
 # End of sfp_subdomain_takeover class

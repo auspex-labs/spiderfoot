@@ -3,7 +3,7 @@ import random
 import time
 
 
-class SpiderFootEvent():
+class SpiderFootEvent:
     """SpiderFootEvent object representing identified data and associated meta data.
 
     Attributes:
@@ -128,7 +128,7 @@ class SpiderFootEvent():
         if self.eventType == "ROOT":
             return "ROOT"
 
-        digestStr = self.__id.encode('raw_unicode_escape')
+        digestStr = self.__id.encode("raw_unicode_escape")
         return hashlib.sha256(digestStr).hexdigest()
 
     @eventType.setter
@@ -285,17 +285,11 @@ class SpiderFootEvent():
             dict: event as dictionary
         """
 
-        evtDict = {
-            'generated': int(self.generated),
-            'type': self.eventType,
-            'data': self.data,
-            'module': self.module,
-            'source': ''
-        }
+        evtDict = {"generated": int(self.generated), "type": self.eventType, "data": self.data, "module": self.module, "source": ""}
 
         if self.sourceEvent is not None:
             if self.sourceEvent.data is not None:
-                evtDict['source'] = self.sourceEvent.data
+                evtDict["source"] = self.sourceEvent.data
 
         return evtDict
 
@@ -308,5 +302,6 @@ class SpiderFootEvent():
             str: event hash
         """
         return self.hash
+
 
 # end of SpiderFootEvent class

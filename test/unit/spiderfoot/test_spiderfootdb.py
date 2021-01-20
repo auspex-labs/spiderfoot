@@ -8,26 +8,27 @@ class TestSpiderFootDb(unittest.TestCase):
     """
     Test SpiderFootDb
     """
+
     default_options = {
-        '_debug': False,
-        '__logging': True,
-        '__outputfilter': None,
-        '_useragent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0',
-        '_dnsserver': '',
-        '_fetchtimeout': 5,
-        '_internettlds': 'https://publicsuffix.org/list/effective_tld_names.dat',
-        '_internettlds_cache': 72,
-        '_genericusers': "abuse,admin,billing,compliance,devnull,dns,ftp,hostmaster,inoc,ispfeedback,ispsupport,list-request,list,maildaemon,marketing,noc,no-reply,noreply,null,peering,peering-notify,peering-request,phish,phishing,postmaster,privacy,registrar,registry,root,routing-registry,rr,sales,security,spam,support,sysadmin,tech,undisclosed-recipients,unsubscribe,usenet,uucp,webmaster,www",
-        '__version__': '3.3-DEV',
-        '__database': 'spiderfoot.test.db',  # note: test database file
-        '__modules__': None,
-        '_socks1type': '',
-        '_socks2addr': '',
-        '_socks3port': '',
-        '_socks4user': '',
-        '_socks5pwd': '',
-        '_torctlport': 9051,
-        '__logstdout': False
+        "_debug": False,
+        "__logging": True,
+        "__outputfilter": None,
+        "_useragent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:62.0) Gecko/20100101 Firefox/62.0",
+        "_dnsserver": "",
+        "_fetchtimeout": 5,
+        "_internettlds": "https://publicsuffix.org/list/effective_tld_names.dat",
+        "_internettlds_cache": 72,
+        "_genericusers": "abuse,admin,billing,compliance,devnull,dns,ftp,hostmaster,inoc,ispfeedback,ispsupport,list-request,list,maildaemon,marketing,noc,no-reply,noreply,null,peering,peering-notify,peering-request,phish,phishing,postmaster,privacy,registrar,registry,root,routing-registry,rr,sales,security,spam,support,sysadmin,tech,undisclosed-recipients,unsubscribe,usenet,uucp,webmaster,www",
+        "__version__": "3.3-DEV",
+        "__database": "spiderfoot.test.db",  # note: test database file
+        "__modules__": None,
+        "_socks1type": "",
+        "_socks2addr": "",
+        "_socks3port": "",
+        "_socks4user": "",
+        "_socks5pwd": "",
+        "_torctlport": 9051,
+        "__logstdout": False,
     }
 
     def test_init_argument_opts_of_invalid_type_should_raise_TypeError(self):
@@ -53,7 +54,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         with self.assertRaises(ValueError):
             opts = dict()
-            opts['__database'] = None
+            opts["__database"] = None
             SpiderFootDb(opts)
 
     def test_init_should_create_SpiderFootDb_object(self):
@@ -70,7 +71,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
         sfdb.create()
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_close_should_close_database_connection(self):
         """
@@ -85,12 +86,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        criteria = {
-            'scan_id': "example scan id",
-            'type': "example type",
-            'value': "example value",
-            'regex': "example regex"
-        }
+        criteria = {"scan_id": "example scan id", "type": "example type", "value": "example value", "regex": "example regex"}
 
         search_results = sfdb.search(criteria, False)
         self.assertIsInstance(search_results, list)
@@ -114,11 +110,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        criteria = {
-            'type': "example type",
-            'value': "example value",
-            'regex': []
-        }
+        criteria = {"type": "example type", "value": "example value", "regex": []}
 
         with self.assertRaises(TypeError):
             sfdb.search(criteria, False)
@@ -129,9 +121,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        criteria = {
-            'invalid_criteria': "example invalid criteria"
-        }
+        criteria = {"invalid_criteria": "example invalid criteria"}
 
         with self.assertRaises(ValueError):
             sfdb.search(criteria, False)
@@ -142,9 +132,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        criteria = {
-            'type': "example type"
-        }
+        criteria = {"type": "example type"}
 
         with self.assertRaises(ValueError):
             sfdb.search(criteria, False)
@@ -164,7 +152,7 @@ class TestSpiderFootDb(unittest.TestCase):
         sfdb = SpiderFootDb(self.default_options, False)
         sfdb.scanLogEvent("", "", "", None)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanLogEvent_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -217,7 +205,7 @@ class TestSpiderFootDb(unittest.TestCase):
 
         sfdb.scanInstanceCreate(instance_id, scan_name, scan_target)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     @unittest.skip("todo")
     def test_scanInstanceCreate_argument_instanceId_already_exists_should_halt_and_catch_fire(self):
@@ -239,7 +227,7 @@ class TestSpiderFootDb(unittest.TestCase):
         with self.assertRaises(IOError):
             sfdb.scanInstanceCreate(instance_id, scan_name, scan_target)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanInstanceCreate_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -289,9 +277,9 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        scan_instance = 'example scan instance'
+        scan_instance = "example scan instance"
         sfdb.scanInstanceSet(scan_instance, None, None, None)
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanInstanceSet_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -338,7 +326,7 @@ class TestSpiderFootDb(unittest.TestCase):
         self.assertIsInstance(scan_instance_get[4], float)
 
         self.assertIsInstance(scan_instance_get[5], str)
-        self.assertEqual(scan_instance_get[5], 'CREATED')
+        self.assertEqual(scan_instance_get[5], "CREATED")
 
     def test_scanInstanceGet_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -416,7 +404,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ALL'
+        event_type = "ALL"
         filter_fp = None
 
         invalid_types = [None, list(), dict(), int()]
@@ -454,7 +442,7 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ALL'
+        event_type = "ALL"
         filter_fp = None
 
         invalid_types = [None, list(), dict(), int()]
@@ -486,7 +474,7 @@ class TestSpiderFootDb(unittest.TestCase):
         scan_logs = sfdb.scanLogs(instance_id, None, None, None)
         self.assertIsInstance(scan_logs, list)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanLogs_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -534,7 +522,7 @@ class TestSpiderFootDb(unittest.TestCase):
         instance_id = "example instance id"
         sfdb.scanInstanceDelete(instance_id)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanInstanceDelete_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -565,7 +553,7 @@ class TestSpiderFootDb(unittest.TestCase):
         fp_flag = None
         sfdb.scanResultsUpdateFP(instance_id, result_hashes, fp_flag)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanResultsUpdateFP_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -601,14 +589,14 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
         opts = dict()
-        opts['example'] = 'example non-default config opt'
+        opts["example"] = "example non-default config opt"
         sfdb.configSet(opts)
 
         config = sfdb.configGet()
         self.assertIsInstance(config, dict)
-        self.assertIn('example', config)
+        self.assertIn("example", config)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_configSet_argument_optmap_of_invalid_type_should_raise_TypeError(self):
         """
@@ -637,18 +625,18 @@ class TestSpiderFootDb(unittest.TestCase):
         sfdb = SpiderFootDb(self.default_options, False)
 
         opts = dict()
-        opts['example'] = 'example non-default config opt'
+        opts["example"] = "example non-default config opt"
         sfdb.configSet(opts)
 
         config = sfdb.configGet()
         self.assertIsInstance(config, dict)
-        self.assertIn('example', config)
+        self.assertIn("example", config)
 
         sfdb.configClear()
 
         config = sfdb.configGet()
         self.assertIsInstance(config, dict)
-        self.assertNotIn('example', config)
+        self.assertNotIn("example", config)
 
     def test_scanConfigSet_argument_optMap_of_invalid_type_should_raise_TypeError(self):
         """
@@ -700,10 +688,10 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         event = SpiderFootEvent(event_type, event_data, module, source_event)
         instance_id = "example instance id"
         sfdb.scanEventStore(instance_id, event)
@@ -750,15 +738,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -776,21 +764,21 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
 
         with self.assertRaises(ValueError):
-            event.eventType = ''
+            event.eventType = ""
             sfdb.scanEventStore(instance_id, event)
 
     def test_scanEventStore_argument_sfEvent_with_invalid_data_property_type_should_raise_TypeError(self):
@@ -799,15 +787,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -825,21 +813,21 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
 
         with self.assertRaises(ValueError):
-            event.data = ''
+            event.data = ""
             sfdb.scanEventStore(instance_id, event)
 
     def test_scanEventStore_argument_sfEvent_with_invalid_module_property_type_should_raise_TypeError(self):
@@ -848,15 +836,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -874,20 +862,20 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
         with self.assertRaises(ValueError):
-            event.module = ''
+            event.module = ""
             sfdb.scanEventStore(instance_id, event)
 
     def test_scanEventStore_argument_sfEvent_with_invalid_confidence_property_type_should_raise_TypeError(self):
@@ -896,15 +884,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -922,15 +910,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -948,15 +936,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -974,15 +962,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -1000,15 +988,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -1026,15 +1014,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -1052,15 +1040,15 @@ class TestSpiderFootDb(unittest.TestCase):
         """
         sfdb = SpiderFootDb(self.default_options, False)
 
-        event_type = 'ROOT'
-        event_data = 'example data'
-        module = ''
-        source_event = ''
+        event_type = "ROOT"
+        event_data = "example data"
+        module = ""
+        source_event = ""
         source_event = SpiderFootEvent(event_type, event_data, module, source_event)
 
-        event_type = 'example event type'
-        event_data = 'example event data'
-        module = 'example module'
+        event_type = "example event type"
+        event_data = "example event data"
+        module = "example module"
         event = SpiderFootEvent(event_type, event_data, module, source_event)
 
         instance_id = "example instance id"
@@ -1114,7 +1102,7 @@ class TestSpiderFootDb(unittest.TestCase):
         scan_element_sources_direct = sfdb.scanElementSourcesDirect(instance_id, element_id_list)
         self.assertIsInstance(scan_element_sources_direct, list)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanElementSourcesDirect_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -1152,7 +1140,7 @@ class TestSpiderFootDb(unittest.TestCase):
         scan_element_children_direct = sfdb.scanElementChildrenDirect(instance_id, list())
         self.assertIsInstance(scan_element_children_direct, list)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanElementChildrenDirect_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -1191,7 +1179,7 @@ class TestSpiderFootDb(unittest.TestCase):
         scan_element_sources_all = sfdb.scanElementSourcesAll(instance_id, child_data)
         self.assertIsInstance(scan_element_sources_all, list)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanElementSourcesAll_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """
@@ -1241,7 +1229,7 @@ class TestSpiderFootDb(unittest.TestCase):
         scan_element_children_all = sfdb.scanElementChildrenAll(instance_id, list())
         self.assertIsInstance(scan_element_children_all, list)
 
-        self.assertEqual('TBD', 'TBD')
+        self.assertEqual("TBD", "TBD")
 
     def test_scanElementChildrenAll_argument_instanceId_of_invalid_type_should_raise_TypeError(self):
         """

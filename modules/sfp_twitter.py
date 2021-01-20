@@ -17,30 +17,28 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_twitter(SpiderFootPlugin):
 
     meta = {
-        'name': "Twitter",
-        'summary': "Gather name and location from Twitter profiles.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Social Media"],
-        'dataSource': {
-            'website': "https://twitter.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [],
-            'favIcon': "https://abs.twimg.com/favicons/twitter.ico",
-            'logo': "https://abs.twimg.com/responsive-web/web/icon-ios.8ea219d4.png",
-            'description': "Twitter is an American microblogging and social networking service "
-            "on which users post and interact with messages known as \"tweets\". "
+        "name": "Twitter",
+        "summary": "Gather name and location from Twitter profiles.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Social Media"],
+        "dataSource": {
+            "website": "https://twitter.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [],
+            "favIcon": "https://abs.twimg.com/favicons/twitter.ico",
+            "logo": "https://abs.twimg.com/responsive-web/web/icon-ios.8ea219d4.png",
+            "description": "Twitter is an American microblogging and social networking service "
+            'on which users post and interact with messages known as "tweets". '
             "Registered users can post, like, and retweet tweets, but unregistered users can only read them.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     def setup(self, sfc, userOpts=dict()):
         self.sf = sfc
@@ -83,27 +81,24 @@ class sfp_twitter(SpiderFootPlugin):
             self.sf.debug("Skipping social network profile, " + url + ", as not a Twitter profile")
             return
 
-        res = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'],
-                               useragent="SpiderFoot")
+        res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent="SpiderFoot")
 
-        if res['content'] is None:
+        if res["content"] is None:
             return
 
-        if not res['code'] == "200":
+        if not res["code"] == "200":
             self.sf.debug(url + " is not a valid Twitter profile")
             return
 
         # Retrieve name
-        human_name = re.findall(r'<div class="fullname">([^<]+)\s*</div>',
-                                res['content'], re.MULTILINE)
+        human_name = re.findall(r'<div class="fullname">([^<]+)\s*</div>', res["content"], re.MULTILINE)
 
         if human_name:
-            e = SpiderFootEvent("RAW_RIR_DATA", "Possible full name: " + human_name[0],
-                                self.__name__, event)
+            e = SpiderFootEvent("RAW_RIR_DATA", "Possible full name: " + human_name[0], self.__name__, event)
             self.notifyListeners(e)
 
         # Retrieve location
-        location = re.findall(r'<div class="location">([^<]+)</div>', res['content'])
+        location = re.findall(r'<div class="location">([^<]+)</div>', res["content"])
 
         if location:
             if len(location[0]) < 3 or len(location[0]) > 100:
@@ -111,5 +106,6 @@ class sfp_twitter(SpiderFootPlugin):
             else:
                 e = SpiderFootEvent("GEOINFO", location[0], self.__name__, event)
                 self.notifyListeners(e)
+
 
 # End of sfp_twitter class

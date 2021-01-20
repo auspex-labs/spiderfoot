@@ -18,25 +18,21 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_names(SpiderFootPlugin):
 
     meta = {
-        'name': "Human Name Extractor",
-        'summary': "Attempt to identify human names in fetched content.",
-        'flags': ["errorprone"],
-        'useCases': ["Footprint", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Human Name Extractor",
+        "summary": "Attempt to identify human names in fetched content.",
+        "flags": ["errorprone"],
+        "useCases": ["Footprint", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
-    opts = {
-        'algolimit': 75,
-        'emailtoname': True,
-        'filterjscss': True
-    }
+    opts = {"algolimit": 75, "emailtoname": True, "filterjscss": True}
 
     # Option descriptions
     optdescs = {
-        'algolimit': "A value between 0-100 to tune the sensitivity of the name finder. Less than 40 will give you a lot of junk, over 50 and you'll probably miss things but will have less false positives.",
-        'emailtoname': "Convert e-mail addresses in the form of firstname.surname@target to names?",
-        'filterjscss': "Filter out names that originated from CSS/JS content. Enabling this avoids detection of popular Javascript and web framework author names."
+        "algolimit": "A value between 0-100 to tune the sensitivity of the name finder. Less than 40 will give you a lot of junk, over 50 and you'll probably miss things but will have less false positives.",
+        "emailtoname": "Convert e-mail addresses in the form of firstname.surname@target to names?",
+        "filterjscss": "Filter out names that originated from CSS/JS content. Enabling this avoids detection of popular Javascript and web framework author names.",
     }
 
     results = None
@@ -55,9 +51,7 @@ class sfp_names(SpiderFootPlugin):
     # What events is this module interested in for input
     # * = be notified about all events.
     def watchedEvents(self):
-        return ["TARGET_WEB_CONTENT", "EMAILADDR",
-                "DOMAIN_WHOIS", "NETBLOCK_WHOIS",
-                "RAW_RIR_DATA", "RAW_FILE_META_DATA"]
+        return ["TARGET_WEB_CONTENT", "EMAILADDR", "DOMAIN_WHOIS", "NETBLOCK_WHOIS", "RAW_RIR_DATA", "RAW_FILE_META_DATA"]
 
     # What events this module produces
     # This is to support the end user in selecting modules based on events
@@ -78,11 +72,11 @@ class sfp_names(SpiderFootPlugin):
         if eventName == "TARGET_WEB_CONTENT":
             url = event.actualSource
             if url is not None:
-                if self.opts['filterjscss'] and (".js" in url or ".css" in url):
+                if self.opts["filterjscss"] and (".js" in url or ".css" in url):
                     self.sf.debug("Ignoring web content from CSS/JS.")
                     return None
 
-        if eventName == "EMAILADDR" and self.opts['emailtoname']:
+        if eventName == "EMAILADDR" and self.opts["emailtoname"]:
             if "." in eventData.split("@")[0]:
                 if type(eventData) == str:
                     name = " ".join(map(str.capitalize, eventData.split("@")[0].split(".")))
@@ -106,10 +100,19 @@ class sfp_names(SpiderFootPlugin):
         # For RAW_RIR_DATA, there are only specific modules we
         # expect to see RELEVANT names within.
         if eventName == "RAW_RIR_DATA":
-            if srcModuleName not in ["sfp_arin", "sfp_builtwith", "sfp_clearbit",
-                                     "sfp_fullcontact", "sfp_github", "sfp_hunter",
-                                     "sfp_opencorporates", "sfp_slideshare",
-                                     "sfp_twitter", "sfp_venmo", "sfp_instagram"]:
+            if srcModuleName not in [
+                "sfp_arin",
+                "sfp_builtwith",
+                "sfp_clearbit",
+                "sfp_fullcontact",
+                "sfp_github",
+                "sfp_hunter",
+                "sfp_opencorporates",
+                "sfp_slideshare",
+                "sfp_twitter",
+                "sfp_venmo",
+                "sfp_instagram",
+            ]:
                 self.sf.debug("Ignoring RAW_RIR_DATA from untrusted module.")
                 return None
 
@@ -162,7 +165,7 @@ class sfp_names(SpiderFootPlugin):
             name = r[0] + " " + secondOrig
 
             self.sf.debug("Name of " + name + " has score: " + str(p))
-            if p > self.opts['algolimit']:
+            if p > self.opts["algolimit"]:
                 # Notify other modules of what you've found
                 evt = SpiderFootEvent("HUMAN_NAME", name, self.__name__, event)
                 if event.moduleDataSource:

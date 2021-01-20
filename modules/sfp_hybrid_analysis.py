@@ -19,44 +19,37 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_hybrid_analysis(SpiderFootPlugin):
 
     meta = {
-        'name': "Hybrid Analysis",
-        'summary': "Search Hybrid Analysis for domains and URLs related to the target.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.hybrid-analysis.com",
-            'model': "FREE_AUTH_UNLIMITED",
-            'references': [
-                "https://www.hybrid-analysis.com/knowledge-base",
-                "https://www.hybrid-analysis.com/docs/api/v2"
-            ],
-            'apiKeyInstructions': [
+        "name": "Hybrid Analysis",
+        "summary": "Search Hybrid Analysis for domains and URLs related to the target.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.hybrid-analysis.com",
+            "model": "FREE_AUTH_UNLIMITED",
+            "references": ["https://www.hybrid-analysis.com/knowledge-base", "https://www.hybrid-analysis.com/docs/api/v2"],
+            "apiKeyInstructions": [
                 "Visit https://www.hybrid-analysis.com/signup",
                 "Register a free account",
                 "Navigate to https://www.hybrid-analysis.com/my-account?tab=%23api-key-tab",
                 "Create an API Key",
-                "The API key is listed under 'API Key'"
+                "The API key is listed under 'API Key'",
             ],
-            'favIcon': "https://www.hybrid-analysis.com/favicon.ico",
-            'logo': "https://www.hybrid-analysis.com/img/logo.svg",
-            'description': "A free malware analysis service for the community. "
+            "favIcon": "https://www.hybrid-analysis.com/favicon.ico",
+            "logo": "https://www.hybrid-analysis.com/img/logo.svg",
+            "description": "A free malware analysis service for the community. "
             "Using this service you can submit files for in-depth static and dynamic analysis.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        "api_key": "",
-        "verify": True,
-        "delay": 1
-    }
+    opts = {"api_key": "", "verify": True, "delay": 1}
 
     # Option descriptions
     optdescs = {
         "api_key": "Hybrid Analysis API key.",
         "verify": "Verify identified domains still resolve to the associated specified IP address.",
-        "delay": "Delay between requests, in seconds."
+        "delay": "Delay between requests, in seconds.",
     }
 
     results = None
@@ -86,22 +79,17 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             str: API response as JSON
         """
 
-        params = {
-            "domain": qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
-        }
-        headers = {
-            "Accept": "application/json",
-            'api-key': self.opts['api_key']
-        }
+        params = {"domain": qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}
+        headers = {"Accept": "application/json", "api-key": self.opts["api_key"]}
         res = self.sf.fetchUrl(
-            'https://www.hybrid-analysis.com/api/v2/search/terms',
+            "https://www.hybrid-analysis.com/api/v2/search/terms",
             headers=headers,
             timeout=15,
             useragent="Falcon Sandbox",
-            postData=params
+            postData=params,
         )
 
-        time.sleep(self.opts['delay'])
+        time.sleep(self.opts["delay"])
 
         return self.parseAPIResponse(res)
 
@@ -115,22 +103,17 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             str: API response as JSON
         """
 
-        params = {
-            "host": qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
-        }
-        headers = {
-            "Accept": "application/json",
-            'api-key': self.opts['api_key']
-        }
+        params = {"host": qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}
+        headers = {"Accept": "application/json", "api-key": self.opts["api_key"]}
         res = self.sf.fetchUrl(
-            'https://www.hybrid-analysis.com/api/v2/search/terms',
+            "https://www.hybrid-analysis.com/api/v2/search/terms",
             headers=headers,
             timeout=15,
             useragent="Falcon Sandbox",
-            postData=params
+            postData=params,
         )
 
-        time.sleep(self.opts['delay'])
+        time.sleep(self.opts["delay"])
 
         return self.parseAPIResponse(res)
 
@@ -144,22 +127,17 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             str: API response as JSON
         """
 
-        params = {
-            "hash": qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
-        }
-        headers = {
-            "Accept": "application/json",
-            'api-key': self.opts['api_key']
-        }
+        params = {"hash": qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}
+        headers = {"Accept": "application/json", "api-key": self.opts["api_key"]}
         res = self.sf.fetchUrl(
-            'https://www.hybrid-analysis.com/api/v2/search/hash',
+            "https://www.hybrid-analysis.com/api/v2/search/hash",
             headers=headers,
             timeout=15,
             useragent="Falcon Sandbox",
-            postData=params
+            postData=params,
         )
 
-        time.sleep(self.opts['delay'])
+        time.sleep(self.opts["delay"])
 
         return self.parseAPIResponse(res)
 
@@ -173,28 +151,28 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             str: API response as JSON
         """
 
-        if res['code'] == '400':
+        if res["code"] == "400":
             self.sf.error("Failed to retrieve content from Hybrid Analysis: Invalid request")
-            self.sf.debug("API response: %s" % res['content'])
+            self.sf.debug("API response: %s" % res["content"])
             return None
 
         # Future proofing - Hybrid Analysis does not implement rate limiting
-        if res['code'] == '429':
+        if res["code"] == "429":
             self.sf.error("Failed to retrieve content from Hybrid Analysis: rate limit exceeded")
             self.errorState = True
             return None
 
         # Catch all non-200 status codes, and presume something went wrong
-        if res['code'] != '200':
-            self.sf.error("Failed to retrieve content from Hybrid Analysis: Unexpected response status %s" % res['code'])
+        if res["code"] != "200":
+            self.sf.error("Failed to retrieve content from Hybrid Analysis: Unexpected response status %s" % res["code"])
             self.errorState = True
             return None
 
-        if res['content'] is None:
+        if res["content"] is None:
             return None
 
         try:
-            data = json.loads(res['content'])
+            data = json.loads(res["content"])
         except Exception as e:
             self.sf.debug(f"Error processing JSON response: {e}")
             return None
@@ -230,7 +208,7 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             self.sf.debug("No information found for %s" % eventData)
             return None
 
-        evt = SpiderFootEvent('RAW_RIR_DATA', str(data), self.__name__, event)
+        evt = SpiderFootEvent("RAW_RIR_DATA", str(data), self.__name__, event)
         self.notifyListeners(evt)
 
         results = data.get("result")
@@ -241,7 +219,7 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
         hashes = []
 
         for result in results:
-            hash = result.get('sha256')
+            hash = result.get("sha256")
             if hash:
                 hashes.append(hash)
 
@@ -260,22 +238,22 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
                 self.sf.debug("No information found for hash %s" % hash)
                 continue
 
-            evt = SpiderFootEvent('RAW_RIR_DATA', str(results), self.__name__, event)
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(results), self.__name__, event)
             self.notifyListeners(evt)
 
             for result in results:
                 if not result:
                     continue
 
-                result_domains = result.get('domains')
+                result_domains = result.get("domains")
                 if result_domains:
                     for r in result_domains:
                         domains.append(r)
 
-                submissions = result.get('submissions')
+                submissions = result.get("submissions")
                 if submissions:
                     for submission in submissions:
-                        url = submission.get('url')
+                        url = submission.get("url")
                         if url:
                             urls.append(url)
 
@@ -287,7 +265,7 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
 
             domains.append(host)
 
-            evt = SpiderFootEvent('LINKED_URL_INTERNAL', url, self.__name__, event)
+            evt = SpiderFootEvent("LINKED_URL_INTERNAL", url, self.__name__, event)
             self.notifyListeners(evt)
 
         for domain in set(domains):
@@ -300,12 +278,13 @@ class sfp_hybrid_analysis(SpiderFootPlugin):
             if not self.getTarget().matches(domain, includeChildren=True, includeParents=True):
                 continue
 
-            if self.opts['verify'] and not self.sf.resolveHost(domain):
+            if self.opts["verify"] and not self.sf.resolveHost(domain):
                 self.sf.debug("Host %s could not be resolved" % domain)
                 evt = SpiderFootEvent("INTERNET_NAME_UNRESOLVED", domain, self.__name__, event)
                 self.notifyListeners(evt)
             else:
                 evt = SpiderFootEvent("INTERNET_NAME", domain, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_hybrid_analysis class

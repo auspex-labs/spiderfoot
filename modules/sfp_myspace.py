@@ -17,32 +17,28 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_myspace(SpiderFootPlugin):
 
     meta = {
-        'name': "MySpace",
-        'summary': "Gather username and location from MySpace.com profiles.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Social Media"],
-        'dataSource': {
-            'website': "https://myspace.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://www.programmableweb.com/api/myspace"
-            ],
-            'favIcon': "https://x.myspacecdn.com/new/common/images/favicons/favicon.ico",
-            'logo': "https://x.myspacecdn.com/new/common/images/favicons/114-Retina-iPhone.png",
-            'description': "Myspace is a place where people come to connect, discover, and share.\n"
+        "name": "MySpace",
+        "summary": "Gather username and location from MySpace.com profiles.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Social Media"],
+        "dataSource": {
+            "website": "https://myspace.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://www.programmableweb.com/api/myspace"],
+            "favIcon": "https://x.myspacecdn.com/new/common/images/favicons/favicon.ico",
+            "logo": "https://x.myspacecdn.com/new/common/images/favicons/114-Retina-iPhone.png",
+            "description": "Myspace is a place where people come to connect, discover, and share.\n"
             "Through an open design, compelling editorial features, "
             "and analytics-based recommendations, Myspace creates a creative community "
             "of people who connect around mutual affinity and inspiration for the purpose "
             "of shaping, sharing, and discovering what's next.",
-        }
+        },
     }
 
-    opts = {
-    }
+    opts = {}
 
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -75,16 +71,18 @@ class sfp_myspace(SpiderFootPlugin):
         # Search by email address
         if eventName == "EMAILADDR":
             email = eventData
-            res = self.sf.fetchUrl("https://myspace.com/search/people?q=" + email,
-                                   timeout=self.opts['_fetchtimeout'],
-                                   useragent=self.opts['_useragent'])
+            res = self.sf.fetchUrl(
+                "https://myspace.com/search/people?q=" + email,
+                timeout=self.opts["_fetchtimeout"],
+                useragent=self.opts["_useragent"],
+            )
 
-            if res['content'] is None:
+            if res["content"] is None:
                 self.sf.error(f"Could not fetch MySpace content for {email}")
                 return None
 
             # Extract HTML containing potential profile matches
-            profiles = re.findall(r'<a href="/[a-zA-Z0-9_]+">[^<]+</a></h6>', res['content'])
+            profiles = re.findall(r'<a href="/[a-zA-Z0-9_]+">[^<]+</a></h6>', res["content"])
 
             if not profiles:
                 self.sf.debug(f"No profiles found for e-mail: {email}")
@@ -95,7 +93,13 @@ class sfp_myspace(SpiderFootPlugin):
 
             # Check for email address as name, at the risk of missed results.
             try:
-                matches = re.findall(r'<a href=\"\/([a-zA-Z0-9_]+)\".*[\&; :\"\#\*\(\"\'\;\,\>\.\?\!]+' + email + r'[\&; :\"\#\*\)\"\'\;\,\<\.\?\!]+', profile, re.IGNORECASE)
+                matches = re.findall(
+                    r"<a href=\"\/([a-zA-Z0-9_]+)\".*[\&; :\"\#\*\(\"\'\;\,\>\.\?\!]+"
+                    + email
+                    + r"[\&; :\"\#\*\)\"\'\;\,\<\.\?\!]+",
+                    profile,
+                    re.IGNORECASE,
+                )
             except Exception:
                 self.sf.debug("Malformed e-mail address, skipping.")
                 return None
@@ -105,12 +109,7 @@ class sfp_myspace(SpiderFootPlugin):
                 return None
 
             name = matches[0]
-            e = SpiderFootEvent(
-                "SOCIAL_MEDIA",
-                f"MySpace: <SFURL>https://myspace.com/{name}</SFURL>",
-                self.__name__,
-                event
-            )
+            e = SpiderFootEvent("SOCIAL_MEDIA", f"MySpace: <SFURL>https://myspace.com/{name}</SFURL>", self.__name__, event)
             self.notifyListeners(e)
 
         # Retrieve location from MySpace profile
@@ -126,13 +125,12 @@ class sfp_myspace(SpiderFootPlugin):
                 self.sf.debug(f"Skipping social network profile, {url}, as not a MySpace profile")
                 return None
 
-            res = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'],
-                                   useragent=self.opts['_useragent'])
+            res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent=self.opts["_useragent"])
 
-            if res['content'] is None:
+            if res["content"] is None:
                 return None
 
-            data = re.findall(r'<div class="location_[^"]+" data-display-text="(.+?)"', res['content'])
+            data = re.findall(r'<div class="location_[^"]+" data-display-text="(.+?)"', res["content"])
 
             if not data:
                 return None
@@ -145,5 +143,6 @@ class sfp_myspace(SpiderFootPlugin):
 
             e = SpiderFootEvent("GEOINFO", location, self.__name__, event)
             self.notifyListeners(e)
+
 
 # End of sfp_myspace class

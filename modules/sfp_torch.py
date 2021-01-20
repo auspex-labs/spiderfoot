@@ -19,23 +19,19 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_torch(SpiderFootPlugin):
 
     meta = {
-        'name': "TORCH",
-        'summary': "Search Tor 'TORCH' search engine for mentions of the target domain.",
-        'flags': ["errorprone"],
-        'useCases': ["Footprint", "Investigate"],
-        'categories': ["Search Engines"]
+        "name": "TORCH",
+        "summary": "Search Tor 'TORCH' search engine for mentions of the target domain.",
+        "flags": ["errorprone"],
+        "useCases": ["Footprint", "Investigate"],
+        "categories": ["Search Engines"],
     }
 
-    opts = {
-        'fetchlinks': True,
-        'pages': 20,
-        'fullnames': True
-    }
+    opts = {"fetchlinks": True, "pages": 20, "fullnames": True}
 
     optdescs = {
-        'fetchlinks': "Fetch the darknet pages (via TOR, if enabled) to verify they mention your target.",
-        'pages': "Number of results pages to iterate through.",
-        'fullnames': "Search for human names?"
+        "fetchlinks": "Fetch the darknet pages (via TOR, if enabled) to verify they mention your target.",
+        "pages": "Number of results pages to iterate through.",
+        "fullnames": "Search for human names?",
     }
 
     results = None
@@ -57,7 +53,7 @@ class sfp_torch(SpiderFootPlugin):
         eventName = event.eventType
         eventData = event.data
 
-        if not self.opts['fullnames'] and eventName == 'HUMAN_NAME':
+        if not self.opts["fullnames"] and eventName == "HUMAN_NAME":
             return
 
         if eventData in self.results:
@@ -67,18 +63,15 @@ class sfp_torch(SpiderFootPlugin):
         self.results[eventData] = True
 
         formpage = self.sf.fetchUrl(
-            "http://xmh57jrzrnw6insl.onion",
-            useragent=self.opts['_useragent'],
-            timeout=self.opts['_fetchtimeout']
+            "http://xmh57jrzrnw6insl.onion", useragent=self.opts["_useragent"], timeout=self.opts["_fetchtimeout"]
         )
 
-        if not formpage['content']:
+        if not formpage["content"]:
             self.sf.info("Couldn't connect to TORCH, check that you have TOR enabled.")
             return
 
         # Need the form ID to submit later for the search
-        m = re.findall(r"\<form method=\"get\" action=\"/(\S+)/search.cgi\"\>",
-                       formpage['content'], re.IGNORECASE | re.DOTALL)
+        m = re.findall(r"\<form method=\"get\" action=\"/(\S+)/search.cgi\"\>", formpage["content"], re.IGNORECASE | re.DOTALL)
         if not m:
             return
 
@@ -87,7 +80,7 @@ class sfp_torch(SpiderFootPlugin):
         pagecontent = ""
         pagecount = 0
         p = ""
-        while "color=gray>next &gt;&gt;" not in pagecontent.lower() and pagecount < self.opts['pages']:
+        while "color=gray>next &gt;&gt;" not in pagecontent.lower() and pagecount < self.opts["pages"]:
             # Check if we've been asked to stop
             if self.checkForStop():
                 return
@@ -98,32 +91,25 @@ class sfp_torch(SpiderFootPlugin):
 
             # Sites hosted on the domain
             data = self.sf.fetchUrl(
-                f"http://xmh57jrzrnw6insl.onion/{formid}/search.cgi?q="
-                + eventData.replace(" ", "%20") + "&cmd=Search!" + p,
-                useragent=self.opts['_useragent'],
-                timeout=self.opts['_fetchtimeout']
+                f"http://xmh57jrzrnw6insl.onion/{formid}/search.cgi?q=" + eventData.replace(" ", "%20") + "&cmd=Search!" + p,
+                useragent=self.opts["_useragent"],
+                timeout=self.opts["_fetchtimeout"],
             )
 
-            if data is None or not data.get('content'):
+            if data is None or not data.get("content"):
                 self.sf.info("No results returned from TORCH.")
                 return
 
-            pagecontent = data['content']
+            pagecontent = data["content"]
 
-            if "No documents were found" in data['content']:
+            if "No documents were found" in data["content"]:
                 return
 
             # Submit the google results for analysis
-            evt = SpiderFootEvent(
-                "SEARCH_ENGINE_WEB_CONTENT",
-                data['content'],
-                self.__name__,
-                event
-            )
+            evt = SpiderFootEvent("SEARCH_ENGINE_WEB_CONTENT", data["content"], self.__name__, event)
             self.notifyListeners(evt)
 
-            links = re.findall(r"\<DT\>\d+.\s+<a href=\"(.*?)\"\s+TARGET=\"_blank\"\>",
-                               data['content'], re.IGNORECASE | re.DOTALL)
+            links = re.findall(r"\<DT\>\d+.\s+<a href=\"(.*?)\"\s+TARGET=\"_blank\"\>", data["content"], re.IGNORECASE | re.DOTALL)
 
             for link in links:
                 if link in self.results:
@@ -136,19 +122,16 @@ class sfp_torch(SpiderFootPlugin):
                     if self.checkForStop():
                         return
 
-                    if self.opts['fetchlinks']:
+                    if self.opts["fetchlinks"]:
                         res = self.sf.fetchUrl(
-                            link,
-                            timeout=self.opts['_fetchtimeout'],
-                            useragent=self.opts['_useragent'],
-                            verify=False
+                            link, timeout=self.opts["_fetchtimeout"], useragent=self.opts["_useragent"], verify=False
                         )
 
-                        if res['content'] is None:
+                        if res["content"] is None:
                             self.sf.debug(f"Ignoring {link} as no data returned")
                             continue
 
-                        if eventData not in res['content']:
+                        if eventData not in res["content"]:
                             self.sf.debug(f"Ignoring {link} as no mention of {eventData}")
                             continue
 
@@ -156,22 +139,19 @@ class sfp_torch(SpiderFootPlugin):
                         self.notifyListeners(evt)
 
                         try:
-                            startIndex = res['content'].index(eventData) - 120
+                            startIndex = res["content"].index(eventData) - 120
                             endIndex = startIndex + len(eventData) + 240
                         except Exception:
                             self.sf.debug("String not found in content.")
                             continue
 
-                        data = res['content'][startIndex:endIndex]
-                        evt = SpiderFootEvent(
-                            "DARKNET_MENTION_CONTENT", "..." + data + "...",
-                            self.__name__,
-                            evt
-                        )
+                        data = res["content"][startIndex:endIndex]
+                        evt = SpiderFootEvent("DARKNET_MENTION_CONTENT", "..." + data + "...", self.__name__, evt)
                         self.notifyListeners(evt)
 
                     else:
                         evt = SpiderFootEvent("DARKNET_MENTION_URL", link, self.__name__, event)
                         self.notifyListeners(evt)
+
 
 # End of sfp_torch class

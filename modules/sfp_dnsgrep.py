@@ -25,44 +25,35 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_dnsgrep(SpiderFootPlugin):
 
     meta = {
-        'name': "DNSGrep",
-        'summary': "Obtain Passive DNS information from Rapid7 Sonar Project using DNSGrep API.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Passive DNS"],
-        'dataSource': {
-            'website': "https://opendata.rapid7.com/",
-            'model': "FREE_AUTH_UNLIMITED",
-            'references': [
-                "https://opendata.rapid7.com/apihelp/",
-                "https://www.rapid7.com/about/research"
-            ],
-            'apiKeyInstructions': [
+        "name": "DNSGrep",
+        "summary": "Obtain Passive DNS information from Rapid7 Sonar Project using DNSGrep API.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Passive DNS"],
+        "dataSource": {
+            "website": "https://opendata.rapid7.com/",
+            "model": "FREE_AUTH_UNLIMITED",
+            "references": ["https://opendata.rapid7.com/apihelp/", "https://www.rapid7.com/about/research"],
+            "apiKeyInstructions": [
                 "Visit https://opendata.rapid7.com/apihelp/",
                 "Submit form requesting for access",
                 "After getting access, navigate to https://insight.rapid7.com/platform#/apiKeyManagement",
                 "Create an User Key",
-                "The API key will be listed after creation"
+                "The API key will be listed after creation",
             ],
-            'favIcon': "https://www.rapid7.com/includes/img/favicon.ico",
-            'logo': "https://www.rapid7.com/includes/img/Rapid7_logo.svg",
-            'description': "Offering researchers and community members open access to data from Project Sonar, "
+            "favIcon": "https://www.rapid7.com/includes/img/favicon.ico",
+            "logo": "https://www.rapid7.com/includes/img/Rapid7_logo.svg",
+            "description": "Offering researchers and community members open access to data from Project Sonar, "
             "which conducts internet-wide surveys to gain insights into global exposure "
             "to common vulnerabilities.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        'timeout': 30,
-        'dns_resolve': True
-    }
+    opts = {"timeout": 30, "dns_resolve": True}
 
     # Option descriptions
-    optdescs = {
-        'timeout': "Query timeout, in seconds.",
-        'dns_resolve': "DNS resolve each identified domain."
-    }
+    optdescs = {"timeout": "Query timeout, in seconds.", "dns_resolve": "DNS resolve each identified domain."}
 
     results = None
 
@@ -83,24 +74,24 @@ class sfp_dnsgrep(SpiderFootPlugin):
 
     # Query the DNSGrep REST API
     def query(self, qry):
-        params = {
-            'q': '.' + qry.encode('raw_unicode_escape').decode("ascii", errors='replace')
-        }
+        params = {"q": "." + qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}
 
-        res = self.sf.fetchUrl('https://dns.bufferover.run/dns?' + urllib.parse.urlencode(params),
-                               timeout=self.opts['timeout'],
-                               useragent=self.opts['_useragent'])
+        res = self.sf.fetchUrl(
+            "https://dns.bufferover.run/dns?" + urllib.parse.urlencode(params),
+            timeout=self.opts["timeout"],
+            useragent=self.opts["_useragent"],
+        )
 
-        if res['content'] is None:
+        if res["content"] is None:
             self.sf.info("No results found for " + qry)
             return None
 
-        if res['code'] != '200':
+        if res["code"] != "200":
             self.sf.debug("Error retrieving search results for " + qry)
             return None
 
         try:
-            data = json.loads(res['content'])
+            data = json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response from DNSGrep: {e}")
             return None
@@ -125,7 +116,7 @@ class sfp_dnsgrep(SpiderFootPlugin):
             self.sf.info("No DNS records found for " + eventData)
             return None
 
-        evt = SpiderFootEvent('RAW_RIR_DATA', str(data), self.__name__, event)
+        evt = SpiderFootEvent("RAW_RIR_DATA", str(data), self.__name__, event)
         self.notifyListeners(evt)
 
         domains = list()
@@ -135,7 +126,7 @@ class sfp_dnsgrep(SpiderFootPlugin):
         if fdns:
             for r in fdns:
                 try:
-                    ip, domain = r.split(',')
+                    ip, domain = r.split(",")
                 except Exception:
                     continue
 
@@ -146,7 +137,7 @@ class sfp_dnsgrep(SpiderFootPlugin):
         if rdns:
             for r in rdns:
                 try:
-                    ip, domain = r.split(',')
+                    ip, domain = r.split(",")
                 except Exception:
                     continue
 
@@ -167,5 +158,6 @@ class sfp_dnsgrep(SpiderFootPlugin):
 
             evt = SpiderFootEvent(evt_type, domain, self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_dnsgrep class

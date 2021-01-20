@@ -18,26 +18,24 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_clearbit(SpiderFootPlugin):
 
     meta = {
-        'name': "Clearbit",
-        'summary': "Check for names, addresses, domains and more based on lookups of e-mail addresses on clearbit.com.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Search Engines"],
-        'dataSource': {
-            'website': "https://clearbit.com/",
-            'model': "FREE_AUTH_LIMITED",
-            'references': [
-                "https://clearbit.com/docs"
-            ],
-            'apiKeyInstructions': [
+        "name": "Clearbit",
+        "summary": "Check for names, addresses, domains and more based on lookups of e-mail addresses on clearbit.com.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Search Engines"],
+        "dataSource": {
+            "website": "https://clearbit.com/",
+            "model": "FREE_AUTH_LIMITED",
+            "references": ["https://clearbit.com/docs"],
+            "apiKeyInstructions": [
                 "Visit https://clearbit.com",
                 "Register account for a Free Trial",
                 "Navigate to https://dashboard.clearbit.com/api",
-                "The API key is listed under 'Your API Key'"
+                "The API key is listed under 'Your API Key'",
             ],
-            'favIcon': "https://clearbit.com/assets/site/logo.png",
-            'logo': "https://clearbit.com/assets/site/logo.png",
-            'description': "Clearbit is the marketing data engine for all of your customer interactions. "
+            "favIcon": "https://clearbit.com/assets/site/logo.png",
+            "logo": "https://clearbit.com/assets/site/logo.png",
+            "description": "Clearbit is the marketing data engine for all of your customer interactions. "
             "Deeply understand your customers, identify future prospects, "
             "and personalize every single marketing and sales interaction.\n"
             "Rely on fresh, accurate data with our proprietary real-time lookups. "
@@ -46,18 +44,14 @@ class sfp_clearbit(SpiderFootPlugin):
             "get employee details like role, seniority, and even job change notifications, right at your fingertips.\n"
             "With our dataset and machine learning algorithms, you’ll have all of "
             "the information you need to convert leads and grow your business.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        "api_key": ""
-    }
+    opts = {"api_key": ""}
 
     # Option descriptions
-    optdescs = {
-        "api_key": "Clearbit.com API key."
-    }
+    optdescs = {"api_key": "Clearbit.com API key."}
 
     # Be sure to completely clear any class variables in setup()
     # or you run the risk of data persisting between scan runs.
@@ -82,30 +76,26 @@ class sfp_clearbit(SpiderFootPlugin):
 
     # What events this module produces
     def producedEvents(self):
-        return ["RAW_RIR_DATA", "PHONE_NUMBER", "PHYSICAL_ADDRESS",
-                "AFFILIATE_INTERNET_NAME", "EMAILADDR", "EMAILADDR_GENERIC"]
+        return ["RAW_RIR_DATA", "PHONE_NUMBER", "PHYSICAL_ADDRESS", "AFFILIATE_INTERNET_NAME", "EMAILADDR", "EMAILADDR_GENERIC"]
 
     def query(self, t):
         ret = None
 
-        api_key = self.opts['api_key']
+        api_key = self.opts["api_key"]
         if type(api_key) == str:
-            api_key = api_key.encode('utf-8')
+            api_key = api_key.encode("utf-8")
         url = "https://person.clearbit.com/v2/combined/find?email=" + t
-        token = base64.b64encode(api_key + ':'.encode('utf-8'))
-        headers = {
-            'Accept': 'application/json',
-            'Authorization': "Basic " + token.decode('utf-8')
-        }
+        token = base64.b64encode(api_key + ":".encode("utf-8"))
+        headers = {"Accept": "application/json", "Authorization": "Basic " + token.decode("utf-8")}
 
-        res = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'], useragent="SpiderFoot", headers=headers)
+        res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent="SpiderFoot", headers=headers)
 
-        if res['code'] != "200":
+        if res["code"] != "200":
             self.sf.error("Return code indicates no results or potential API key failure or exceeded limits.")
             return None
 
         try:
-            ret = json.loads(res['content'])
+            ret = json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response from clearbit.io: {e}")
             return None
@@ -121,7 +111,7 @@ class sfp_clearbit(SpiderFootPlugin):
         if self.errorState:
             return None
 
-        if self.opts['api_key'] == "":
+        if self.opts["api_key"] == "":
             self.sf.error("You enabled sfp_clearbit but did not set an API key!")
             self.errorState = True
             return None
@@ -142,9 +132,8 @@ class sfp_clearbit(SpiderFootPlugin):
         try:
             # Get the name associated with the e-mail
             if "person" in data:
-                name = data['person']['name']['fullName']
-                evt = SpiderFootEvent("RAW_RIR_DATA", "Possible full name: " + name,
-                                      self.__name__, event)
+                name = data["person"]["name"]["fullName"]
+                evt = SpiderFootEvent("RAW_RIR_DATA", "Possible full name: " + name, self.__name__, event)
                 self.notifyListeners(evt)
         except Exception:
             self.sf.debug("Unable to extract name from JSON.")
@@ -156,18 +145,18 @@ class sfp_clearbit(SpiderFootPlugin):
             if "geo" in data:
                 loc = ""
 
-                if 'streetNumber' in data['geo']:
-                    loc += data['geo']['streetNumber'] + ", "
-                if 'streetName' in data['geo']:
-                    loc += data['geo']['streetName'] + ", "
-                if 'city' in data['geo']:
-                    loc += data['geo']['city'] + ", "
-                if 'postalCode' in data['geo']:
-                    loc += data['geo']['postalCode'] + ", "
-                if 'state' in data['geo']:
-                    loc += data['geo']['state'] + ", "
-                if 'country' in data['geo']:
-                    loc += data['geo']['country']
+                if "streetNumber" in data["geo"]:
+                    loc += data["geo"]["streetNumber"] + ", "
+                if "streetName" in data["geo"]:
+                    loc += data["geo"]["streetName"] + ", "
+                if "city" in data["geo"]:
+                    loc += data["geo"]["city"] + ", "
+                if "postalCode" in data["geo"]:
+                    loc += data["geo"]["postalCode"] + ", "
+                if "state" in data["geo"]:
+                    loc += data["geo"]["state"] + ", "
+                if "country" in data["geo"]:
+                    loc += data["geo"]["country"]
                 evt = SpiderFootEvent("PHYSICAL_ADDRESS", loc, self.__name__, event)
                 self.notifyListeners(evt)
         except Exception:
@@ -176,20 +165,19 @@ class sfp_clearbit(SpiderFootPlugin):
 
         try:
             if "company" in data:
-                if 'domainAliases' in data['company']:
-                    for d in data['company']['domainAliases']:
-                        evt = SpiderFootEvent("AFFILIATE_INTERNET_NAME", d,
-                                              self.__name__, event)
+                if "domainAliases" in data["company"]:
+                    for d in data["company"]["domainAliases"]:
+                        evt = SpiderFootEvent("AFFILIATE_INTERNET_NAME", d, self.__name__, event)
                         self.notifyListeners(evt)
 
-                if 'site' in data['company']:
-                    if 'phoneNumbers' in data['company']['site']:
-                        for p in data['company']['site']['phoneNumbers']:
+                if "site" in data["company"]:
+                    if "phoneNumbers" in data["company"]["site"]:
+                        for p in data["company"]["site"]["phoneNumbers"]:
                             evt = SpiderFootEvent("PHONE_NUMBER", p, self.__name__, event)
                             self.notifyListeners(evt)
-                    if 'emailAddresses' in data['company']['site']:
-                        for e in data['company']['site']['emailAddresses']:
-                            if e.split("@")[0] in self.opts['_genericusers'].split(","):
+                    if "emailAddresses" in data["company"]["site"]:
+                        for e in data["company"]["site"]["emailAddresses"]:
+                            if e.split("@")[0] in self.opts["_genericusers"].split(","):
                                 evttype = "EMAILADDR_GENERIC"
                             else:
                                 evttype = "EMAILADDR"
@@ -198,25 +186,26 @@ class sfp_clearbit(SpiderFootPlugin):
 
                 # Get the location of the person, also indicating
                 # the location of the employer.
-                if 'geo' in data['company']:
+                if "geo" in data["company"]:
                     loc = ""
 
-                    if 'streetNumber' in data['company']['geo']:
-                        loc += data['company']['geo']['streetNumber'] + ", "
-                    if 'streetName' in data['company']['geo']:
-                        loc += data['company']['geo']['streetName'] + ", "
-                    if 'city' in data['company']['geo']:
-                        loc += data['company']['geo']['city'] + ", "
-                    if 'postalCode' in data['company']['geo']:
-                        loc += data['company']['geo']['postalCode'] + ", "
-                    if 'state' in data['company']['geo']:
-                        loc += data['company']['geo']['state'] + ", "
-                    if 'country' in data['company']['geo']:
-                        loc += data['company']['geo']['country']
+                    if "streetNumber" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["streetNumber"] + ", "
+                    if "streetName" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["streetName"] + ", "
+                    if "city" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["city"] + ", "
+                    if "postalCode" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["postalCode"] + ", "
+                    if "state" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["state"] + ", "
+                    if "country" in data["company"]["geo"]:
+                        loc += data["company"]["geo"]["country"]
                     evt = SpiderFootEvent("PHYSICAL_ADDRESS", loc, self.__name__, event)
                     self.notifyListeners(evt)
         except Exception:
             self.sf.debug("Unable to company info from JSON.")
             pass
+
 
 # End of sfp_clearbit class

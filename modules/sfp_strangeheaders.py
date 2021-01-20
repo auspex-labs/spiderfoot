@@ -82,11 +82,11 @@ headers = [
 class sfp_strangeheaders(SpiderFootPlugin):
 
     meta = {
-        'name': "Strange Header Identifier",
-        'summary': "Obtain non-standard HTTP headers returned by web servers.",
-        'flags': [""],
-        'useCases': ["Footprint", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Strange Header Identifier",
+        "summary": "Obtain non-standard HTTP headers returned by web servers.",
+        "flags": [""],
+        "useCases": ["Footprint", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
@@ -141,8 +141,8 @@ class sfp_strangeheaders(SpiderFootPlugin):
         for key in jdata:
             if key.lower() not in headers:
                 val = key + ": " + jdata[key]
-                evt = SpiderFootEvent("WEBSERVER_STRANGEHEADER", val,
-                                      self.__name__, event)
+                evt = SpiderFootEvent("WEBSERVER_STRANGEHEADER", val, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_strangeheaders class

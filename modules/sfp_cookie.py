@@ -18,11 +18,11 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_cookie(SpiderFootPlugin):
 
     meta = {
-        'name': "Cookie Extractor",
-        'summary': "Extract Cookies from HTTP headers.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Content Analysis"]
+        "name": "Cookie Extractor",
+        "summary": "Extract Cookies from HTTP headers.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Content Analysis"],
     }
 
     # Default options
@@ -74,9 +74,9 @@ class sfp_cookie(SpiderFootPlugin):
             self.sf.error("Received HTTP headers from another module in an unexpected format.")
             return None
 
-        if 'set-cookie' in jdata:
-            evt = SpiderFootEvent("TARGET_WEB_COOKIE", jdata['set-cookie'],
-                                  self.__name__, event)
+        if "set-cookie" in jdata:
+            evt = SpiderFootEvent("TARGET_WEB_COOKIE", jdata["set-cookie"], self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_cookie class

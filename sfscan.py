@@ -21,7 +21,7 @@ from sflib import SpiderFoot
 from spiderfoot import SpiderFootDb, SpiderFootEvent, SpiderFootPlugin, SpiderFootTarget
 
 
-class SpiderFootScanner():
+class SpiderFootScanner:
     """SpiderFootScanner object.
 
     Attributes:
@@ -123,31 +123,31 @@ class SpiderFootScanner():
             raise ValueError(f"Invalid target: {e}")
 
         # Save the config current set for this scan
-        self.__config['_modulesenabled'] = self.__moduleList
+        self.__config["_modulesenabled"] = self.__moduleList
         self.__dbh.scanConfigSet(self.__scanId, self.__sf.configSerialize(deepcopy(self.__config)))
 
         # Process global options that point to other places for data
 
         # If a SOCKS server was specified, set it up
-        if self.__config['_socks1type']:
-            socksAddr = self.__config['_socks2addr']
-            socksPort = int(self.__config['_socks3port'])
-            socksUsername = self.__config['_socks4user'] or ''
-            socksPassword = self.__config['_socks5pwd'] or ''
+        if self.__config["_socks1type"]:
+            socksAddr = self.__config["_socks2addr"]
+            socksPort = int(self.__config["_socks3port"])
+            socksUsername = self.__config["_socks4user"] or ""
+            socksPassword = self.__config["_socks5pwd"] or ""
 
             proxy = f"{socksAddr}:{socksPort}"
 
             if socksUsername or socksPassword:
                 proxy = "%s:%s@%s" % (socksUsername, socksPassword, proxy)
 
-            if self.__config['_socks1type'] == '4':
-                proxy = 'socks4://' + proxy
-            elif self.__config['_socks1type'] == '5':
-                proxy = 'socks5://' + proxy
-            elif self.__config['_socks1type'] == 'HTTP':
-                proxy = 'http://' + proxy
-            elif self.__config['_socks1type'] == 'TOR':
-                proxy = 'socks5h://' + proxy
+            if self.__config["_socks1type"] == "4":
+                proxy = "socks4://" + proxy
+            elif self.__config["_socks1type"] == "5":
+                proxy = "socks5://" + proxy
+            elif self.__config["_socks1type"] == "HTTP":
+                proxy = "http://" + proxy
+            elif self.__config["_socks1type"] == "TOR":
+                proxy = "socks5h://" + proxy
             else:
                 raise ValueError(f"Invalid SOCKS proxy type: {self.__config['_socks1ttype']}")
 
@@ -158,23 +158,23 @@ class SpiderFootScanner():
             self.__sf.socksProxy = None
 
         # Override the default DNS server
-        if self.__config['_dnsserver']:
+        if self.__config["_dnsserver"]:
             res = dns.resolver.Resolver()
-            res.nameservers = [self.__config['_dnsserver']]
+            res.nameservers = [self.__config["_dnsserver"]]
             dns.resolver.override_system_resolver(res)
         else:
             dns.resolver.restore_system_resolver()
 
         # Set the user agent
-        self.__config['_useragent'] = self.__sf.optValueToData(self.__config['_useragent'])
+        self.__config["_useragent"] = self.__sf.optValueToData(self.__config["_useragent"])
 
         # Get internet TLDs
-        tlddata = self.__sf.cacheGet("internet_tlds", self.__config['_internettlds_cache'])
+        tlddata = self.__sf.cacheGet("internet_tlds", self.__config["_internettlds_cache"])
 
         # If it wasn't loadable from cache, load it from scratch
         if tlddata is None:
-            self.__config['_internettlds'] = self.__sf.optValueToData(self.__config['_internettlds'])
-            self.__sf.cachePut("internet_tlds", self.__config['_internettlds'])
+            self.__config["_internettlds"] = self.__sf.optValueToData(self.__config["_internettlds"])
+            self.__sf.cachePut("internet_tlds", self.__config["_internettlds"])
         else:
             self.__config["_internettlds"] = tlddata.splitlines()
 
@@ -215,7 +215,7 @@ class SpiderFootScanner():
             "ABORTED",
             "ABORTING",
             "FINISHED",
-            "ERROR-FAILED"
+            "ERROR-FAILED",
         ]:
             raise ValueError(f"Invalid scan status {status}")
 
@@ -233,11 +233,11 @@ class SpiderFootScanner():
         try:
             # moduleList = list of modules the user wants to run
             for modName in self.__moduleList:
-                if modName == '':
+                if modName == "":
                     continue
 
                 try:
-                    module = __import__('modules.' + modName, globals(), locals(), [modName])
+                    module = __import__("modules." + modName, globals(), locals(), [modName])
                 except ImportError:
                     self.__sf.error(f"Failed to load module: {modName}")
                     continue
@@ -246,12 +246,12 @@ class SpiderFootScanner():
                 mod.__name__ = modName
 
                 # Module may have been renamed or removed
-                if modName not in self.__config['__modules__']:
+                if modName not in self.__config["__modules__"]:
                     continue
 
                 # Set up the module
                 # Configuration is a combined global config with module-specific options
-                self.__modconfig[modName] = deepcopy(self.__config['__modules__'][modName]['opts'])
+                self.__modconfig[modName] = deepcopy(self.__config["__modules__"][modName]["opts"])
                 for opt in list(self.__config.keys()):
                     self.__modconfig[modName][opt] = deepcopy(self.__config[opt])
 
@@ -269,12 +269,12 @@ class SpiderFootScanner():
 
                 # Override the module's local socket module
                 # to be the SOCKS one.
-                if self.__config['_socks1type'] != '':
+                if self.__config["_socks1type"] != "":
                     mod._updateSocket(socket)
 
                 # Set up event output filters if requested
-                if self.__config['__outputfilter']:
-                    mod.setOutputFilter(self.__config['__outputfilter'])
+                if self.__config["__outputfilter"]:
+                    mod.setOutputFilter(self.__config["__outputfilter"])
 
                 self.__sf.status(modName + " module loaded.")
 
@@ -309,15 +309,13 @@ class SpiderFootScanner():
             # Create the "ROOT" event which un-triggered modules will link events to
             rootEvent = SpiderFootEvent("ROOT", self.__targetValue, "", None)
             psMod.notifyListeners(rootEvent)
-            firstEvent = SpiderFootEvent(self.__targetType, self.__targetValue,
-                                         "SpiderFoot UI", rootEvent)
+            firstEvent = SpiderFootEvent(self.__targetType, self.__targetValue, "SpiderFoot UI", rootEvent)
             psMod.notifyListeners(firstEvent)
 
             # Special case.. check if an INTERNET_NAME is also a domain
-            if self.__targetType == 'INTERNET_NAME':
-                if self.__sf.isDomain(self.__targetValue, self.__config['_internettlds']):
-                    firstEvent = SpiderFootEvent('DOMAIN_NAME', self.__targetValue,
-                                                 "SpiderFoot UI", rootEvent)
+            if self.__targetType == "INTERNET_NAME":
+                if self.__sf.isDomain(self.__targetValue, self.__config["_internettlds"]):
+                    firstEvent = SpiderFootEvent("DOMAIN_NAME", self.__targetValue, "SpiderFoot UI", rootEvent)
                     psMod.notifyListeners(firstEvent)
 
             # If in interactive mode, loop through this shared global variable
@@ -328,7 +326,7 @@ class SpiderFootScanner():
             # initializing
             for module in list(self.__moduleInstances.values()):
                 if module.checkForStop():
-                    self.__setStatus('ABORTING')
+                    self.__setStatus("ABORTING")
                     aborted = True
                     break
 
@@ -340,9 +338,11 @@ class SpiderFootScanner():
                 self.__setStatus("FINISHED", None, time.time() * 1000)
         except BaseException as e:
             exc_type, exc_value, exc_traceback = sys.exc_info()
-            self.__sf.error(f"Unhandled exception ({e.__class__.__name__}) encountered during scan."
-                            + "Please report this as a bug: "
-                            + repr(traceback.format_exception(exc_type, exc_value, exc_traceback)))
+            self.__sf.error(
+                f"Unhandled exception ({e.__class__.__name__}) encountered during scan."
+                + "Please report this as a bug: "
+                + repr(traceback.format_exception(exc_type, exc_value, exc_traceback))
+            )
             self.__sf.status(f"Scan [{self.__scanId}] failed: {e}")
             self.__setStatus("ERROR-FAILED", None, time.time() * 1000)
 

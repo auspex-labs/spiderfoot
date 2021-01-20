@@ -1,7 +1,7 @@
 import netaddr
 
 
-class SpiderFootTarget():
+class SpiderFootTarget:
     """SpiderFoot target.
 
     Attributes:
@@ -11,9 +11,18 @@ class SpiderFootTarget():
         targetAliases (list): target aliases
     """
 
-    _validTypes = ["IP_ADDRESS", 'IPV6_ADDRESS', "NETBLOCK_OWNER", "INTERNET_NAME",
-                   "EMAILADDR", "HUMAN_NAME", "BGP_AS_OWNER", 'PHONE_NUMBER', "USERNAME",
-                   "BITCOIN_ADDRESS"]
+    _validTypes = [
+        "IP_ADDRESS",
+        "IPV6_ADDRESS",
+        "NETBLOCK_OWNER",
+        "INTERNET_NAME",
+        "EMAILADDR",
+        "HUMAN_NAME",
+        "BGP_AS_OWNER",
+        "PHONE_NUMBER",
+        "USERNAME",
+        "BITCOIN_ADDRESS",
+    ]
     _targetType = None
     _targetValue = None
     _targetAliases = list()
@@ -86,12 +95,10 @@ class SpiderFootTarget():
         if not isinstance(typeName, (str, bytes)):
             return
 
-        if {'type': typeName, 'value': value} in self.targetAliases:
+        if {"type": typeName, "value": value} in self.targetAliases:
             return
 
-        self.targetAliases.append(
-            {'type': typeName, 'value': value.lower()}
-        )
+        self.targetAliases.append({"type": typeName, "value": value.lower()})
 
     def _getEquivalents(self, typeName):
         """TBD
@@ -105,8 +112,8 @@ class SpiderFootTarget():
 
         ret = list()
         for item in self.targetAliases:
-            if item['type'] == typeName:
-                ret.append(item['value'].lower())
+            if item["type"] == typeName:
+                ret.append(item["value"].lower())
         return ret
 
     def getNames(self):
@@ -212,5 +219,6 @@ class SpiderFootTarget():
                 return True
 
         return False
+
 
 # end of SpiderFootTarget class

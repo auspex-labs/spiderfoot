@@ -27,9 +27,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
         "dataSource": {
             "website": "https://developers.google.com/safe-browsing/v4/lookup-api",
             "model": "FREE_AUTH_UNLIMITED",
-            "references": [
-                "https://developers.google.com/safe-browsing/v4/reference/rest"
-            ],
+            "references": ["https://developers.google.com/safe-browsing/v4/reference/rest"],
             "apiKeyInstructions": [
                 "Visit https://console.developers.google.com/",
                 "Register a free Google account or sign in",
@@ -92,10 +90,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
     def query(self, qry):
 
         headers = {"Content-Type": "application/json"}
-        url = (
-            "https://safebrowsing.googleapis.com/v4/threatMatches"
-            f":find?key={self.opts['api_key']}"
-        )
+        url = "https://safebrowsing.googleapis.com/v4/threatMatches" f":find?key={self.opts['api_key']}"
         payload = {
             "client": {"clientId": "SpiderFoot", "clientVersion": "3.2"},
             "threatInfo": {
@@ -112,13 +107,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
                     "URL",
                     "EXECUTABLE",
                 ],
-                "threatEntries": [
-                    {
-                        "url": qry.encode("raw_unicode_escape").decode(
-                            "ascii", errors="replace"
-                        )
-                    }
-                ],
+                "threatEntries": [{"url": qry.encode("raw_unicode_escape").decode("ascii", errors="replace")}],
             },
         }
         res = self.sf.fetchUrl(
@@ -140,16 +129,12 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
             return None
 
         if res["code"] == "403":
-            self.sf.error(
-                "Permission denied, invalid API key on Google Safe Browsing API"
-            )
+            self.sf.error("Permission denied, invalid API key on Google Safe Browsing API")
             self.errorState = True
             return None
 
         if res["code"] in ["500", "503", "504"]:
-            self.sf.error(
-                "Google Safe Browsing API is having some troubles or unavailable."
-            )
+            self.sf.error("Google Safe Browsing API is having some troubles or unavailable.")
             self.errorState = True
             return None
 
@@ -176,9 +161,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "":
-            self.sf.error(
-                "You enabled sfp_googlesafebrowsing but did not set an API key!"
-            )
+            self.sf.error("You enabled sfp_googlesafebrowsing but did not set an API key!")
             self.errorState = True
             return None
 
@@ -212,9 +195,7 @@ class sfp_googlesafebrowsing(SpiderFootPlugin):
         evt = SpiderFootEvent("RAW_RIR_DATA", str(rec), self.__name__, event)
         self.notifyListeners(evt)
 
-        evt = SpiderFootEvent(
-            evtType, "Google SafeBrowsing [" + eventData + "]", self.__name__, event
-        )
+        evt = SpiderFootEvent(evtType, "Google SafeBrowsing [" + eventData + "]", self.__name__, event)
         self.notifyListeners(evt)
 
 

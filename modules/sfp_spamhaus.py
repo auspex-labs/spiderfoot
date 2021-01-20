@@ -20,44 +20,39 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_spamhaus(SpiderFootPlugin):
 
     meta = {
-        'name': "Spamhaus",
-        'summary': "Query the Spamhaus databases for open relays, open proxies, vulnerable servers, etc.",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.spamhaus.org/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
+        "name": "Spamhaus",
+        "summary": "Query the Spamhaus databases for open relays, open proxies, vulnerable servers, etc.",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.spamhaus.org/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [
                 "https://www.spamhaus.org/organization/dnsblusage/",
                 "https://www.spamhaus.org/datafeed/",
                 "https://www.spamhaus.org/whitepapers/dnsbl_function/",
-                "https://www.spamhaus.org/faq/section/DNSBL%20Usage"
+                "https://www.spamhaus.org/faq/section/DNSBL%20Usage",
             ],
-            'favIcon': "https://www.spamhaus.org/favicon.ico",
-            'logo': "https://www.spamhaus.org/images/sh_logo1.jpg",
-            'description': "The Spamhaus Project is an international nonprofit organization that "
+            "favIcon": "https://www.spamhaus.org/favicon.ico",
+            "logo": "https://www.spamhaus.org/images/sh_logo1.jpg",
+            "description": "The Spamhaus Project is an international nonprofit organization that "
             "tracks spam and related cyber threats such as phishing, malware and botnets, "
             "provides realtime actionable and highly accurate threat intelligence to "
             "the Internet's major networks, corporations and security vendors, "
             "and works with law enforcement agencies to identify and pursue spam and malware sources worldwide.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        'netblocklookup': True,
-        'maxnetblock': 24,
-        'subnetlookup': True,
-        'maxsubnet': 24
-    }
+    opts = {"netblocklookup": True, "maxnetblock": 24, "subnetlookup": True, "maxsubnet": 24}
 
     # Option descriptions
     optdescs = {
-        'netblocklookup': "Look up all IPs on netblocks deemed to be owned by your target for possible blacklisted hosts on the same target subdomain/domain?",
-        'maxnetblock': "If looking up owned netblocks, the maximum netblock size to look up all IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
-        'subnetlookup': "Look up all IPs on subnets which your target is a part of for blacklisting?",
-        'maxsubnet': "If looking up subnets, the maximum subnet size to look up all the IPs within (CIDR value, 24 = /24, 16 = /16, etc.)"
+        "netblocklookup": "Look up all IPs on netblocks deemed to be owned by your target for possible blacklisted hosts on the same target subdomain/domain?",
+        "maxnetblock": "If looking up owned netblocks, the maximum netblock size to look up all IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
+        "subnetlookup": "Look up all IPs on subnets which your target is a part of for blacklisting?",
+        "maxsubnet": "If looking up subnets, the maximum subnet size to look up all the IPs within (CIDR value, 24 = /24, 16 = /16, etc.)",
     }
 
     # Target
@@ -68,15 +63,15 @@ class sfp_spamhaus(SpiderFootPlugin):
     # Check out:
     # http://www.blocklist.de/en/rbldns.html
     checks = {
-        'zen.spamhaus.org': {
-            '127.0.0.2': "Spamhaus (Zen) - Spammer",
-            '127.0.0.3': "Spamhaus (Zen) - Spammer",
-            '127.0.0.4': "Spamhaus (Zen) - Proxies, Trojans, etc.",
-            '127.0.0.5': "Spamhaus (Zen) - Proxies, Trojans, etc.",
-            '127.0.0.6': "Spamhaus (Zen) - Proxies, Trojans, etc.",
-            '127.0.0.7': "Spamhaus (Zen) - Proxies, Trojans, etc.",
-            '127.0.0.10': "Spamhaus (Zen) - Potential Spammer",
-            '127.0.0.11': "Spamhaus (Zen) - Potential Spammer"
+        "zen.spamhaus.org": {
+            "127.0.0.2": "Spamhaus (Zen) - Spammer",
+            "127.0.0.3": "Spamhaus (Zen) - Spammer",
+            "127.0.0.4": "Spamhaus (Zen) - Proxies, Trojans, etc.",
+            "127.0.0.5": "Spamhaus (Zen) - Proxies, Trojans, etc.",
+            "127.0.0.6": "Spamhaus (Zen) - Proxies, Trojans, etc.",
+            "127.0.0.7": "Spamhaus (Zen) - Proxies, Trojans, etc.",
+            "127.0.0.10": "Spamhaus (Zen) - Potential Spammer",
+            "127.0.0.11": "Spamhaus (Zen) - Potential Spammer",
         }
     }
 
@@ -88,16 +83,14 @@ class sfp_spamhaus(SpiderFootPlugin):
             self.opts[opt] = userOpts[opt]
 
     def watchedEvents(self):
-        return ['IP_ADDRESS', 'AFFILIATE_IPADDR', 'NETBLOCK_OWNER',
-                'NETBLOCK_MEMBER']
+        return ["IP_ADDRESS", "AFFILIATE_IPADDR", "NETBLOCK_OWNER", "NETBLOCK_MEMBER"]
 
     def producedEvents(self):
-        return ["BLACKLISTED_IPADDR", "BLACKLISTED_AFFILIATE_IPADDR",
-                "BLACKLISTED_SUBNET", "BLACKLISTED_NETBLOCK"]
+        return ["BLACKLISTED_IPADDR", "BLACKLISTED_AFFILIATE_IPADDR", "BLACKLISTED_SUBNET", "BLACKLISTED_NETBLOCK"]
 
     # Swap 1.2.3.4 to 4.3.2.1
     def reverseAddr(self, ipaddr):
-        return '.'.join(reversed(ipaddr.split('.')))
+        return ".".join(reversed(ipaddr.split(".")))
 
     def queryAddr(self, qaddr, parentEvent):
         eventName = parentEvent.eventType
@@ -160,20 +153,20 @@ class sfp_spamhaus(SpiderFootPlugin):
 
         self.results[eventData] = True
 
-        if eventName == 'NETBLOCK_OWNER':
-            if not self.opts['netblocklookup']:
+        if eventName == "NETBLOCK_OWNER":
+            if not self.opts["netblocklookup"]:
                 return
 
-            max_netblock = self.opts['maxnetblock']
+            max_netblock = self.opts["maxnetblock"]
             if IPNetwork(eventData).prefixlen < max_netblock:
                 self.sf.debug(f"Network size bigger than permitted: {IPNetwork(eventData).prefixlen} > {max_netblock}")
                 return
 
-        if eventName == 'NETBLOCK_MEMBER':
-            if not self.opts['subnetlookup']:
+        if eventName == "NETBLOCK_MEMBER":
+            if not self.opts["subnetlookup"]:
                 return
 
-            max_subnet = self.opts['maxsubnet']
+            max_subnet = self.opts["maxsubnet"]
             if IPNetwork(eventData).prefixlen < max_subnet:
                 self.sf.debug(f"Network size bigger than permitted: {IPNetwork(eventData).prefixlen} > {max_subnet}")
                 return
@@ -185,5 +178,6 @@ class sfp_spamhaus(SpiderFootPlugin):
                 self.queryAddr(str(addr), parentEvent)
         else:
             self.queryAddr(eventData, parentEvent)
+
 
 # End of sfp_spamhaus class

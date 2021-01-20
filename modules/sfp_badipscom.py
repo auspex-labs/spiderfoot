@@ -16,37 +16,31 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_badipscom(SpiderFootPlugin):
 
     meta = {
-        'name': "badips.com",
-        'summary': "Check if an IP address is malicious according to BadIPs.com.",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.badips.com/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
-                "https://www.badips.com/documentation",
-                "https://www.badips.com/info"
-            ],
-            'favIcon': "https://www.google.com/s2/favicons?domain=https://www.badips.com/",
-            'logo': "https://www.badips.com/img/badips.com-lm.png",
-            'description': "badips.com is a community based IP blacklist service. "
+        "name": "badips.com",
+        "summary": "Check if an IP address is malicious according to BadIPs.com.",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.badips.com/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": ["https://www.badips.com/documentation", "https://www.badips.com/info"],
+            "favIcon": "https://www.google.com/s2/favicons?domain=https://www.badips.com/",
+            "logo": "https://www.badips.com/img/badips.com-lm.png",
+            "description": "badips.com is a community based IP blacklist service. "
             "You can report malicious IPs and you can download blacklists or query our API to find out if a IP is listed. "
             "We're also offering some eye-candy: Get personalized stats and graphs of attackers trying to brute-force your systems, "
             "see where the bad guys come from and share your knowledge!",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        'checkaffiliates': True,
-        'cacheperiod': 18
-    }
+    opts = {"checkaffiliates": True, "cacheperiod": 18}
 
     # Option descriptions
     optdescs = {
-        'checkaffiliates': "Apply checks to affiliate IP addresses?",
-        'cacheperiod': "Hours to cache list data before re-fetching."
+        "checkaffiliates": "Apply checks to affiliate IP addresses?",
+        "cacheperiod": "Hours to cache list data before re-fetching.",
     }
 
     results = None
@@ -73,10 +67,10 @@ class sfp_badipscom(SpiderFootPlugin):
         url = "https://www.badips.com/get/list/any/1?age=24h"
 
         data = dict()
-        data["content"] = self.sf.cacheGet("sfmal_" + cid, self.opts.get('cacheperiod', 0))
+        data["content"] = self.sf.cacheGet("sfmal_" + cid, self.opts.get("cacheperiod", 0))
 
         if data["content"] is None:
-            data = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'], useragent=self.opts['_useragent'])
+            data = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent=self.opts["_useragent"])
 
             if data["code"] != "200":
                 self.sf.error("Unable to fetch %s" % url)
@@ -88,9 +82,9 @@ class sfp_badipscom(SpiderFootPlugin):
                 self.errorState = True
                 return None
 
-            self.sf.cachePut("sfmal_" + cid, data['content'])
+            self.sf.cachePut("sfmal_" + cid, data["content"])
 
-        for line in data["content"].split('\n'):
+        for line in data["content"].split("\n"):
             if qry.lower() == line.lower():
                 self.sf.debug("%s found in BadIPS.com IP Reputation List." % (qry))
                 return url
@@ -112,17 +106,17 @@ class sfp_badipscom(SpiderFootPlugin):
         if self.errorState:
             return
 
-        if eventName not in ['IP_ADDRESS', 'AFFILIATE_IPADDR']:
+        if eventName not in ["IP_ADDRESS", "AFFILIATE_IPADDR"]:
             return
 
         self.results[eventData] = True
 
-        evtType = 'MALICIOUS_IPADDR'
+        evtType = "MALICIOUS_IPADDR"
 
-        if eventName == 'AFFILIATE_IPADDR':
-            if not self.opts.get('checkaffiliates', False):
+        if eventName == "AFFILIATE_IPADDR":
+            if not self.opts.get("checkaffiliates", False):
                 return
-            evtType = 'MALICIOUS_AFFILIATE_IPADDR'
+            evtType = "MALICIOUS_AFFILIATE_IPADDR"
 
         self.sf.debug("Checking maliciousness of IP address %s with BadIPs.com" % eventData)
 
@@ -134,5 +128,6 @@ class sfp_badipscom(SpiderFootPlugin):
         text = "BadIPs.com IP Reputation List [%s]\n<SFURL>%s</SFURL>" % (eventData, url)
         evt = SpiderFootEvent(evtType, text, self.__name__, event)
         self.notifyListeners(evt)
+
 
 # End of sfp_badipscom class

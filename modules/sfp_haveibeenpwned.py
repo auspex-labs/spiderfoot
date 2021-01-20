@@ -18,34 +18,27 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_haveibeenpwned(SpiderFootPlugin):
 
     meta = {
-        'name': "HaveIBeenPwned",
-        'summary': "Check HaveIBeenPwned.com for hacked e-mail addresses identified in breaches.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Leaks, Dumps and Breaches"],
-        'dataSource': {
-            'website': "https://haveibeenpwned.com/",
-            'model': "COMMERCIAL_ONLY",
-            'references': [
-                "https://haveibeenpwned.com/API/v3",
-                "https://haveibeenpwned.com/FAQs"
-            ],
-            'apiKeyInstructions': [],
-            'favIcon': "https://haveibeenpwned.com/favicon.ico",
-            'logo': "https://haveibeenpwned.com/favicon.ico",
-            'description': "Check if you have an account that has been compromised in a data breach.",
-        }
+        "name": "HaveIBeenPwned",
+        "summary": "Check HaveIBeenPwned.com for hacked e-mail addresses identified in breaches.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Leaks, Dumps and Breaches"],
+        "dataSource": {
+            "website": "https://haveibeenpwned.com/",
+            "model": "COMMERCIAL_ONLY",
+            "references": ["https://haveibeenpwned.com/API/v3", "https://haveibeenpwned.com/FAQs"],
+            "apiKeyInstructions": [],
+            "favIcon": "https://haveibeenpwned.com/favicon.ico",
+            "logo": "https://haveibeenpwned.com/favicon.ico",
+            "description": "Check if you have an account that has been compromised in a data breach.",
+        },
     }
 
     # Default options
-    opts = {
-        "api_key": ""
-    }
+    opts = {"api_key": ""}
 
     # Option descriptions
-    optdescs = {
-        "api_key": "HaveIBeenPwned.com API key."
-    }
+    optdescs = {"api_key": "HaveIBeenPwned.com API key."}
 
     # Be sure to completely clear any class variables in setup()
     # or you run the risk of data persisting between scan runs.
@@ -74,7 +67,7 @@ class sfp_haveibeenpwned(SpiderFootPlugin):
 
     def query(self, qry):
         ret = None
-        if self.opts['api_key']:
+        if self.opts["api_key"]:
             version = "3"
         else:
             version = "2"
@@ -83,33 +76,32 @@ class sfp_haveibeenpwned(SpiderFootPlugin):
         hdrs = {"Accept": f"application/vnd.haveibeenpwned.v{version}+json"}
         retry = 0
 
-        if self.opts['api_key']:
-            hdrs['hibp-api-key'] = self.opts['api_key']
+        if self.opts["api_key"]:
+            hdrs["hibp-api-key"] = self.opts["api_key"]
 
         while retry < 2:
             # https://haveibeenpwned.com/API/v2#RateLimiting
             time.sleep(1.5)
-            res = self.sf.fetchUrl(url, timeout=self.opts['_fetchtimeout'],
-                                   useragent="SpiderFoot", headers=hdrs)
+            res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent="SpiderFoot", headers=hdrs)
 
-            if res['code'] == "200":
+            if res["code"] == "200":
                 break
 
-            if res['code'] == "404":
+            if res["code"] == "404":
                 return None
 
-            if res['code'] == "429":
+            if res["code"] == "429":
                 # Back off a little further
                 time.sleep(2)
             retry += 1
 
-            if res['code'] == "401":
+            if res["code"] == "401":
                 self.sf.error("Failed to authenticate key with HaveIBeenPwned.com.")
                 self.errorState = True
                 return None
 
         try:
-            ret = json.loads(res['content'])
+            ret = json.loads(res["content"])
         except Exception as e:
             self.sf.error(f"Error processing JSON response from HaveIBeenPwned?: {e}")
             return None
@@ -140,7 +132,7 @@ class sfp_haveibeenpwned(SpiderFootPlugin):
 
         for n in data:
             try:
-                if not self.opts['api_key']:
+                if not self.opts["api_key"]:
                     site = n["Title"]
                 else:
                     site = n["Name"]
@@ -150,8 +142,8 @@ class sfp_haveibeenpwned(SpiderFootPlugin):
 
             evt = eventName + "_COMPROMISED"
             # Notify other modules of what you've found
-            e = SpiderFootEvent(evt, eventData + " [" + site + "]",
-                                self.__name__, event)
+            e = SpiderFootEvent(evt, eventData + " [" + site + "]", self.__name__, event)
             self.notifyListeners(e)
+
 
 # End of sfp_haveibeenpwned class

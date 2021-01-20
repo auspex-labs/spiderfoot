@@ -15,41 +15,33 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_bingsearch(SpiderFootPlugin):
 
     meta = {
-        'name': "Bing",
-        'summary': "Obtain information from bing to identify sub-domains and links.",
-        'flags': ["apikey"],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Search Engines"],
-        'dataSource': {
-            'website': "https://www.bing.com/",
-            'model': "FREE_AUTH_LIMITED",
-            'references': [
-                "https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/"
-            ],
-            'apiKeyInstructions': [
+        "name": "Bing",
+        "summary": "Obtain information from bing to identify sub-domains and links.",
+        "flags": ["apikey"],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Search Engines"],
+        "dataSource": {
+            "website": "https://www.bing.com/",
+            "model": "FREE_AUTH_LIMITED",
+            "references": ["https://docs.microsoft.com/en-us/azure/cognitive-services/bing-web-search/"],
+            "apiKeyInstructions": [
                 "Visit https://azure.microsoft.com/en-in/services/cognitive-services/bing-web-search-api/",
                 "Register a free account",
                 "Select on Bing Custom Search",
-                "The API keys are listed under 'Key1' and 'Key2' (both should work)"
+                "The API keys are listed under 'Key1' and 'Key2' (both should work)",
             ],
-            'favIcon': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'logo': "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
-            'description': "The Bing Search APIs let you build web-connected apps and services that "
+            "favIcon": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "logo": "https://www.bing.com/sa/simg/bing_p_rr_teal_min.ico",
+            "description": "The Bing Search APIs let you build web-connected apps and services that "
             "find webpages, images, news, locations, and more without advertisements.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-        "pages": 20,
-        "api_key": ""
-    }
+    opts = {"pages": 20, "api_key": ""}
 
     # Option descriptions
-    optdescs = {
-        "pages": "Number of max bing results to request from the API.",
-        "api_key": "Bing API Key for Bing search."
-    }
+    optdescs = {"pages": "Number of max bing results to request from the API.", "api_key": "Bing API Key for Bing search."}
 
     results = None
     errorState = False
@@ -82,7 +74,7 @@ class sfp_bingsearch(SpiderFootPlugin):
 
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
-        if self.opts['api_key'] == "":
+        if self.opts["api_key"] == "":
             self.sf.error("You enabled sfp_bingsearch but did not set a Bing API key!")
             self.errorState = True
             return None
@@ -115,9 +107,7 @@ class sfp_bingsearch(SpiderFootPlugin):
         for link in new_links:
             self.results[link] = True
 
-        internal_links = [
-            link for link in new_links if self.sf.urlFQDN(link).endswith(eventData)
-        ]
+        internal_links = [link for link in new_links if self.sf.urlFQDN(link).endswith(eventData)]
         for link in internal_links:
             self.sf.debug("Found a link: " + link)
 
@@ -125,9 +115,8 @@ class sfp_bingsearch(SpiderFootPlugin):
             self.notifyListeners(evt)
 
         if internal_links:
-            evt = SpiderFootEvent(
-                "RAW_RIR_DATA", str(res), self.__name__, event
-            )
+            evt = SpiderFootEvent("RAW_RIR_DATA", str(res), self.__name__, event)
             self.notifyListeners(evt)
+
 
 # End of sfp_bingsearch class

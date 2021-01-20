@@ -86,9 +86,7 @@ class sfp_projectdiscovery(SpiderFootPlugin):
         try:
             info = json.loads(res["content"])
         except json.JSONDecodeError as e:
-            self.sf.error(
-                f"Error processing JSON response from Chaos projectdiscovery: {e}"
-            )
+            self.sf.error(f"Error processing JSON response from Chaos projectdiscovery: {e}")
             return None
 
         return info
@@ -106,9 +104,7 @@ class sfp_projectdiscovery(SpiderFootPlugin):
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
         if self.opts["api_key"] == "":
-            self.sf.error(
-                "You enabled sfp_projectdiscovery but did not set an API key!"
-            )
+            self.sf.error("You enabled sfp_projectdiscovery but did not set an API key!")
             self.errorState = True
             return None
 
@@ -143,16 +139,13 @@ class sfp_projectdiscovery(SpiderFootPlugin):
             completeSubdomain = f"{subdomain}.{eventData}"
             if self.opts["verify"] and not self.sf.resolveHost(completeSubdomain):
                 self.sf.debug(f"Host {completeSubdomain} could not be resolved")
-                evt = SpiderFootEvent(
-                    "INTERNET_NAME_UNRESOLVED", completeSubdomain, self.__name__, event
-                )
+                evt = SpiderFootEvent("INTERNET_NAME_UNRESOLVED", completeSubdomain, self.__name__, event)
                 self.notifyListeners(evt)
             else:
-                evt = SpiderFootEvent(
-                    "INTERNET_NAME", completeSubdomain, self.__name__, event
-                )
+                evt = SpiderFootEvent("INTERNET_NAME", completeSubdomain, self.__name__, event)
                 self.notifyListeners(evt)
 
             resultsSet.add(subdomain)
+
 
 # End of sfp_projectdiscovery class

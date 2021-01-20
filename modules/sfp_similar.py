@@ -14,67 +14,61 @@
 from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 
 nearchars = {
-    'a': ['4', 's'],
-    'b': ['v', 'n'],
-    'c': ['x', 'v'],
-    'd': ['s', 'f'],
-    'e': ['w', 'r'],
-    'f': ['d', 'g'],
-    'g': ['f', 'h'],
-    'h': ['g', 'j', 'n'],
-    'i': ['o', 'u', '1'],
-    'j': ['k', 'h', 'i'],
-    'k': ['l', 'j'],
-    'l': ['i', '1', 'k'],
-    'm': ['n'],
-    'n': ['m'],
-    'o': ['p', 'i', '0'],
-    'p': ['o', 'q'],
-    'r': ['t', 'e'],
-    's': ['a', 'd', '5'],
-    't': ['7', 'y', 'z', 'r'],
-    'u': ['v', 'i', 'y', 'z'],
-    'v': ['u', 'c', 'b'],
-    'w': ['v', 'vv', 'q', 'e'],
-    'x': ['z', 'y', 'c'],
-    'y': ['z', 'x'],
-    'z': ['y', 'x'],
-    '0': ['o'],
-    '1': ['l'],
-    '2': ['5'],
-    '3': ['e'],
-    '4': ['a'],
-    '5': ['s'],
-    '6': ['b'],
-    '7': ['t'],
-    '8': ['b'],
-    '9': []
+    "a": ["4", "s"],
+    "b": ["v", "n"],
+    "c": ["x", "v"],
+    "d": ["s", "f"],
+    "e": ["w", "r"],
+    "f": ["d", "g"],
+    "g": ["f", "h"],
+    "h": ["g", "j", "n"],
+    "i": ["o", "u", "1"],
+    "j": ["k", "h", "i"],
+    "k": ["l", "j"],
+    "l": ["i", "1", "k"],
+    "m": ["n"],
+    "n": ["m"],
+    "o": ["p", "i", "0"],
+    "p": ["o", "q"],
+    "r": ["t", "e"],
+    "s": ["a", "d", "5"],
+    "t": ["7", "y", "z", "r"],
+    "u": ["v", "i", "y", "z"],
+    "v": ["u", "c", "b"],
+    "w": ["v", "vv", "q", "e"],
+    "x": ["z", "y", "c"],
+    "y": ["z", "x"],
+    "z": ["y", "x"],
+    "0": ["o"],
+    "1": ["l"],
+    "2": ["5"],
+    "3": ["e"],
+    "4": ["a"],
+    "5": ["s"],
+    "6": ["b"],
+    "7": ["t"],
+    "8": ["b"],
+    "9": [],
 }
 
-pairs = {
-    'oo': ['00'],
-    'll': ['l1l', 'l1l', '111', '11'],
-    '11': ['ll', 'lll', 'l1l', '1l1']
-}
+pairs = {"oo": ["00"], "ll": ["l1l", "l1l", "111", "11"], "11": ["ll", "lll", "l1l", "1l1"]}
 
 
 class sfp_similar(SpiderFootPlugin):
 
     meta = {
-        'name': "Similar Domain Finder",
-        'summary': "Search various sources to identify similar looking domain names, for instance squatted domains.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate"],
-        'categories': ["DNS"]
+        "name": "Similar Domain Finder",
+        "summary": "Search various sources to identify similar looking domain names, for instance squatted domains.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate"],
+        "categories": ["DNS"],
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     # Internal results tracking
     results = None
@@ -101,7 +95,7 @@ class sfp_similar(SpiderFootPlugin):
     def handleEvent(self, event):
         eventData = event.data
 
-        dom = self.sf.domainKeyword(eventData, self.opts['_internettlds'])
+        dom = self.sf.domainKeyword(eventData, self.opts["_internettlds"])
         if not dom:
             return
 
@@ -124,7 +118,7 @@ class sfp_similar(SpiderFootPlugin):
                 continue
             npos = pos + 1
             for xc in nearchars[c]:
-                newdom = dom[0:pos] + xc + dom[npos:len(dom)]
+                newdom = dom[0:pos] + xc + dom[npos : len(dom)]
                 domlist.append(newdom)
 
             pos += 1
@@ -143,7 +137,7 @@ class sfp_similar(SpiderFootPlugin):
         # Search for double character domains
         pos = 0
         for c in dom:
-            domlist.append(dom[0:pos] + c + c + dom[(pos + 1):len(dom)])
+            domlist.append(dom[0:pos] + c + c + dom[(pos + 1) : len(dom)])
             pos += 1
 
         for d in domlist:
@@ -156,5 +150,6 @@ class sfp_similar(SpiderFootPlugin):
                     self.notifyListeners(evt)
             except Exception:
                 continue
+
 
 # End of sfp_similar class

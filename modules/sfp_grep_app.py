@@ -24,34 +24,31 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_grep_app(SpiderFootPlugin):
 
     meta = {
-        'name': "grep.app",
-        'summary': "Search grep.app API for links and emails related to the specified domain.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Search Engines"],
-        'dataSource': {
-            'website': "https://grep.app/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [],
-            'favIcon': "https://grep.app/favicon-16x16.png",
-            'logo': "https://grep.app/apple-touch-icon.png",
-            'description': "grep.app searches code from over a half million public repositories on GitHub.\n"
+        "name": "grep.app",
+        "summary": "Search grep.app API for links and emails related to the specified domain.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Search Engines"],
+        "dataSource": {
+            "website": "https://grep.app/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [],
+            "favIcon": "https://grep.app/favicon-16x16.png",
+            "logo": "https://grep.app/apple-touch-icon.png",
+            "description": "grep.app searches code from over a half million public repositories on GitHub.\n"
             "It searches for the exact string you enter, including any punctuation or other characters.\n"
             "You can also search by regular expression, using the RE2 syntax.",
-        }
+        },
     }
 
     # Default options
     opts = {
-        'max_pages': 20,
-        'dns_resolve': True,
+        "max_pages": 20,
+        "dns_resolve": True,
     }
 
     # Option descriptions
-    optdescs = {
-        'max_pages': "Maximum number of pages of results to fetch.",
-        'dns_resolve': "DNS resolve each identified domain."
-    }
+    optdescs = {"max_pages": "Maximum number of pages of results to fetch.", "dns_resolve": "DNS resolve each identified domain."}
 
     results = None
     errorState = False
@@ -68,27 +65,32 @@ class sfp_grep_app(SpiderFootPlugin):
         return ["DOMAIN_NAME"]
 
     def producedEvents(self):
-        return ["EMAILADDR", "EMAILADDR_GENERIC", "DOMAIN_NAME",
-                "INTERNET_NAME", "RAW_RIR_DATA",
-                "INTERNET_NAME_UNRESOLVED", "LINKED_URL_INTERNAL"]
+        return [
+            "EMAILADDR",
+            "EMAILADDR_GENERIC",
+            "DOMAIN_NAME",
+            "INTERNET_NAME",
+            "RAW_RIR_DATA",
+            "INTERNET_NAME_UNRESOLVED",
+            "LINKED_URL_INTERNAL",
+        ]
 
     def query(self, qry, page):
-        params = {
-            'q': qry.encode('raw_unicode_escape').decode("ascii", errors='replace'),
-            'page': str(page)
-        }
+        params = {"q": qry.encode("raw_unicode_escape").decode("ascii", errors="replace"), "page": str(page)}
 
-        res = self.sf.fetchUrl("https://grep.app/api/search?" + urllib.parse.urlencode(params),
-                               useragent=self.opts['_useragent'],
-                               timeout=self.opts['_fetchtimeout'])
+        res = self.sf.fetchUrl(
+            "https://grep.app/api/search?" + urllib.parse.urlencode(params),
+            useragent=self.opts["_useragent"],
+            timeout=self.opts["_fetchtimeout"],
+        )
 
         time.sleep(1)
 
-        if res['content'] is None:
+        if res["content"] is None:
             return None
 
         try:
-            data = json.loads(res['content'])
+            data = json.loads(res["content"])
         except Exception as e:
             self.sf.debug(f"Error processing JSON response: {e}")
             return None
@@ -107,14 +109,14 @@ class sfp_grep_app(SpiderFootPlugin):
 
         self.sf.debug(f"Received event, {eventName}, from {srcModuleName}")
 
-        if srcModuleName == 'sfp_grep_app':
+        if srcModuleName == "sfp_grep_app":
             self.sf.debug("Ignoring " + eventData + ", from self.")
             return None
 
         hosts = list()
         page = 1
         per_page = 10
-        pages = self.opts['max_pages']
+        pages = self.opts["max_pages"]
         while page <= pages:
             if self.checkForStop():
                 return None
@@ -127,12 +129,12 @@ class sfp_grep_app(SpiderFootPlugin):
             if res is None:
                 return None
 
-            facets = res.get('facets')
+            facets = res.get("facets")
 
             if facets is None:
                 return None
 
-            count = facets.get('count')
+            count = facets.get("count")
 
             if count is None:
                 return None
@@ -148,12 +150,12 @@ class sfp_grep_app(SpiderFootPlugin):
             self.sf.info("Parsing page " + str(page) + " of " + str(pages))
             page += 1
 
-            hits = res.get('hits')
+            hits = res.get("hits")
 
             if hits is None:
                 return None
 
-            data = hits.get('hits')
+            data = hits.get("hits")
 
             if data is None:
                 return None
@@ -165,17 +167,17 @@ class sfp_grep_app(SpiderFootPlugin):
                 evt = SpiderFootEvent("RAW_RIR_DATA", str(result), self.__name__, event)
                 self.notifyListeners(evt)
 
-                content = result.get('content')
+                content = result.get("content")
 
                 if content is None:
                     continue
 
-                snippet = content.get('snippet')
+                snippet = content.get("snippet")
 
                 if snippet is None:
                     continue
 
-                links = self.sf.extractUrls(snippet.replace('<mark>', '').replace('</mark>', ''))
+                links = self.sf.extractUrls(snippet.replace("<mark>", "").replace("</mark>", ""))
                 if links:
                     for link in links:
                         if link in self.results:
@@ -192,24 +194,24 @@ class sfp_grep_app(SpiderFootPlugin):
                             self.sf.debug("Skipped unrelated link: " + link)
                             continue
 
-                        self.sf.debug('Found a link: ' + link)
-                        evt = SpiderFootEvent('LINKED_URL_INTERNAL', link, self.__name__, event)
+                        self.sf.debug("Found a link: " + link)
+                        evt = SpiderFootEvent("LINKED_URL_INTERNAL", link, self.__name__, event)
                         self.notifyListeners(evt)
                         self.results[link] = True
 
-                emails = self.sf.parseEmails(snippet.replace('<mark>', '').replace('</mark>', ''))
+                emails = self.sf.parseEmails(snippet.replace("<mark>", "").replace("</mark>", ""))
                 if emails:
                     for email in emails:
                         if email in self.results:
                             continue
 
-                        mail_domain = email.lower().split('@')[1]
+                        mail_domain = email.lower().split("@")[1]
                         if not self.getTarget().matches(mail_domain, includeChildren=True, includeParents=True):
                             self.sf.debug("Skipped unrelated email address: " + email)
                             continue
 
                         self.sf.info("Found e-mail address: " + email)
-                        if email.split("@")[0] in self.opts['_genericusers'].split(","):
+                        if email.split("@")[0] in self.opts["_genericusers"].split(","):
                             evttype = "EMAILADDR_GENERIC"
                         else:
                             evttype = "EMAILADDR"
@@ -225,7 +227,7 @@ class sfp_grep_app(SpiderFootPlugin):
             if self.errorState:
                 return None
 
-            if self.opts['dns_resolve'] and not self.sf.resolveHost(host):
+            if self.opts["dns_resolve"] and not self.sf.resolveHost(host):
                 self.sf.debug(f"Host {host} could not be resolved")
                 evt = SpiderFootEvent("INTERNET_NAME_UNRESOLVED", host, self.__name__, event)
                 self.notifyListeners(evt)
@@ -236,5 +238,6 @@ class sfp_grep_app(SpiderFootPlugin):
             if self.sf.isDomain(host, self.opts["_internettlds"]):
                 evt = SpiderFootEvent("DOMAIN_NAME", host, self.__name__, event)
                 self.notifyListeners(evt)
+
 
 # End of sfp_grep_app class

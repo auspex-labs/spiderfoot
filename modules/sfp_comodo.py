@@ -19,36 +19,34 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_comodo(SpiderFootPlugin):
 
     meta = {
-        'name': "Comodo",
-        'summary': "Check if a host would be blocked by Comodo DNS",
-        'flags': [""],
-        'useCases': ["Investigate", "Passive"],
-        'categories': ["Reputation Systems"],
-        'dataSource': {
-            'website': "https://www.comodo.com/secure-dns/",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
+        "name": "Comodo",
+        "summary": "Check if a host would be blocked by Comodo DNS",
+        "flags": [""],
+        "useCases": ["Investigate", "Passive"],
+        "categories": ["Reputation Systems"],
+        "dataSource": {
+            "website": "https://www.comodo.com/secure-dns/",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [
                 "https://cdome.comodo.com/pdf/Datasheet-Dome-Shield.pdf?af=7639#_ga=2.9039612.872056824.1587327669-445877257.1587327669",
                 "https://wiki.comodo.com/frontend/web/category/dome-shield?af=7639#_ga=2.9039612.872056824.1587327669-445877257.1587327669",
                 "https://www.comodo.com/secure-dns/secure-dns-assets/dowloads/ccs-dome-shield-whitepaper-threat-intelligence.pdf?af=7639",
-                "https://www.comodo.com/secure-dns/secure-dns-assets/dowloads/domeshield-all-use-cases.pdf?af=7639"
+                "https://www.comodo.com/secure-dns/secure-dns-assets/dowloads/domeshield-all-use-cases.pdf?af=7639",
             ],
-            'favIcon': "https://www.comodo.com/favicon.ico",
-            'logo': "https://www.comodo.com/new-assets/images/logo.png",
-            'description': "100% cloud-based, load-balanced, geo-distributed, highly available Anycast DNS infrastructure hosted in 25+ countries.\n"
+            "favIcon": "https://www.comodo.com/favicon.ico",
+            "logo": "https://www.comodo.com/new-assets/images/logo.png",
+            "description": "100% cloud-based, load-balanced, geo-distributed, highly available Anycast DNS infrastructure hosted in 25+ countries.\n"
             "Cloud-based web security delivered at the DNS level, first layer for everything internet connected.\n"
             "Per company, location, endpoint, mobile device, IP, subnet and user.\n"
             "Get real-time web visibility for everything internet connected and schedule reports to be sent to your email.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     results = None
 
@@ -67,8 +65,7 @@ class sfp_comodo(SpiderFootPlugin):
     # This is to support the end user in selecting modules based on events
     # produced.
     def producedEvents(self):
-        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME",
-                "MALICIOUS_COHOST"]
+        return ["MALICIOUS_INTERNET_NAME", "MALICIOUS_AFFILIATE_INTERNET_NAME", "MALICIOUS_COHOST"]
 
     def queryAddr(self, qaddr):
         res = dns.resolver.Resolver()
@@ -113,8 +110,8 @@ class sfp_comodo(SpiderFootPlugin):
             if eventName == "CO_HOSTED_SITE":
                 typ = "MALICIOUS_COHOST"
             if not found:
-                evt = SpiderFootEvent(typ, "Blocked by Comodo DNS [" + eventData + "]",
-                                      self.__name__, parentEvent)
+                evt = SpiderFootEvent(typ, "Blocked by Comodo DNS [" + eventData + "]", self.__name__, parentEvent)
                 self.notifyListeners(evt)
+
 
 # End of sfp_comodo class

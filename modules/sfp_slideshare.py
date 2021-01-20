@@ -17,35 +17,33 @@ from spiderfoot import SpiderFootEvent, SpiderFootPlugin
 class sfp_slideshare(SpiderFootPlugin):
 
     meta = {
-        'name': "SlideShare",
-        'summary': "Gather name and location from SlideShare profiles.",
-        'flags': [""],
-        'useCases': ["Footprint", "Investigate", "Passive"],
-        'categories': ["Social Media"],
-        'dataSource': {
-            'website': "https://www.slideshare.net",
-            'model': "FREE_NOAUTH_UNLIMITED",
-            'references': [
+        "name": "SlideShare",
+        "summary": "Gather name and location from SlideShare profiles.",
+        "flags": [""],
+        "useCases": ["Footprint", "Investigate", "Passive"],
+        "categories": ["Social Media"],
+        "dataSource": {
+            "website": "https://www.slideshare.net",
+            "model": "FREE_NOAUTH_UNLIMITED",
+            "references": [
                 "https://www.slideshare.net/developers/documentation",
                 "https://www.slideshare.net/developers",
                 "https://www.slideshare.net/developers/resources",
-                "https://www.slideshare.net/developers/oembed"
+                "https://www.slideshare.net/developers/oembed",
             ],
-            'favIcon': "https://public.slidesharecdn.com/favicon.ico?d8e2a4ed15",
-            'logo': "https://public.slidesharecdn.com/images/logo/linkedin-ss/SS_Logo_White_Large.png?6d1f7a78a6",
-            'description': "LinkedIn SlideShare is an American hosting service for professional content including "
+            "favIcon": "https://public.slidesharecdn.com/favicon.ico?d8e2a4ed15",
+            "logo": "https://public.slidesharecdn.com/images/logo/linkedin-ss/SS_Logo_White_Large.png?6d1f7a78a6",
+            "description": "LinkedIn SlideShare is an American hosting service for professional content including "
             "presentations, infographics, documents, and videos. "
             "Users can upload files privately or publicly in PowerPoint, Word, PDF, or OpenDocument format.",
-        }
+        },
     }
 
     # Default options
-    opts = {
-    }
+    opts = {}
 
     # Option descriptions
-    optdescs = {
-    }
+    optdescs = {}
 
     def setup(self, sfc, userOpts=dict()):
         self.sf = sfc
@@ -91,17 +89,13 @@ class sfp_slideshare(SpiderFootPlugin):
             self.sf.debug(f"Skipping social network profile, {url}, as not a SlideShare profile")
             return None
 
-        res = self.sf.fetchUrl(
-            url,
-            timeout=self.opts['_fetchtimeout'],
-            useragent=self.opts['_useragent']
-        )
+        res = self.sf.fetchUrl(url, timeout=self.opts["_fetchtimeout"], useragent=self.opts["_useragent"])
 
-        if res['content'] is None:
+        if res["content"] is None:
             return None
 
         # Check if the profile is valid and extract name
-        human_name = self.extractMeta('slideshare:name', res['content'])
+        human_name = self.extractMeta("slideshare:name", res["content"])
 
         if not human_name:
             self.sf.debug(f"{url} is not a valid SlideShare profile")
@@ -111,7 +105,7 @@ class sfp_slideshare(SpiderFootPlugin):
         self.notifyListeners(e)
 
         # Retrieve location (country)
-        location = self.extractMeta('slideshare:location', res['content'])
+        location = self.extractMeta("slideshare:location", res["content"])
 
         if not location:
             return None
@@ -122,5 +116,6 @@ class sfp_slideshare(SpiderFootPlugin):
 
         e = SpiderFootEvent("GEOINFO", location[0], self.__name__, event)
         self.notifyListeners(e)
+
 
 # End of sfp_slideshare class

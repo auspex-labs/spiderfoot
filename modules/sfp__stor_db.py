@@ -16,23 +16,15 @@ from spiderfoot import SpiderFootPlugin
 
 class sfp__stor_db(SpiderFootPlugin):
 
-    meta = {
-        'name': "Storage",
-        'summary': "Stores scan results into the back-end SpiderFoot database. You will need this."
-    }
+    meta = {"name": "Storage", "summary": "Stores scan results into the back-end SpiderFoot database. You will need this."}
 
     _priority = 0
 
     # Default options
-    opts = {
-        'maxstorage': 1024,  # max bytes for any piece of info stored (0 = unlimited)
-        '_store': True
-    }
+    opts = {"maxstorage": 1024, "_store": True}  # max bytes for any piece of info stored (0 = unlimited)
 
     # Option descriptions
-    optdescs = {
-        'maxstorage': "Maximum bytes to store for any piece of information retreived (0 = unlimited.)"
-    }
+    optdescs = {"maxstorage": "Maximum bytes to store for any piece of information retreived (0 = unlimited.)"}
 
     def setup(self, sfc, userOpts=dict()):
         self.sf = sfc
@@ -48,16 +40,17 @@ class sfp__stor_db(SpiderFootPlugin):
 
     # Handle events sent to this module
     def handleEvent(self, sfEvent):
-        if not self.opts['_store']:
+        if not self.opts["_store"]:
             return
 
-        if self.opts['maxstorage'] != 0:
-            if len(sfEvent.data) > self.opts['maxstorage']:
+        if self.opts["maxstorage"] != 0:
+            if len(sfEvent.data) > self.opts["maxstorage"]:
                 self.sf.debug("Storing an event: " + sfEvent.eventType)
-                self.__sfdb__.scanEventStore(self.getScanId(), sfEvent, self.opts['maxstorage'])
+                self.__sfdb__.scanEventStore(self.getScanId(), sfEvent, self.opts["maxstorage"])
                 return
 
         self.sf.debug("Storing an event: " + sfEvent.eventType)
         self.__sfdb__.scanEventStore(self.getScanId(), sfEvent)
+
 
 # End of sfp__stor_db class
